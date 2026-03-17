@@ -58,7 +58,7 @@
     .nav-item:hover { background-color: #f4f4f5; color: #18181b; }
   </style>
 </head>
-<body class="dark bg-zinc-950 text-zinc-100 min-h-screen">
+<body class="bg-white text-zinc-900 min-h-screen">
 
 <!-- OPTION BANNER -->
 <div class="bg-blue-600 text-white text-center text-xs py-1.5 font-medium tracking-wide z-50 relative">
@@ -807,7 +807,7 @@ function toggleSidebar() {
 }
 
 // ─── THEME ────────────────────────────────────────────────────────────────────
-let isDark = true;
+let isDark = false;
 function toggleTheme() {
   isDark = !isDark;
   document.documentElement.classList.toggle('dark', isDark);
