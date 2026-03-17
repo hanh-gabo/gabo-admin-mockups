@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gabo Admin — Option B: Dense Data-Centric</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['IBM Plex Sans', 'system-ui', 'sans-serif'],
+          mono: ['IBM Plex Mono', 'Courier New', 'monospace'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  * { box-sizing: border-box; }
+  body { font-size: 13px; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+  .tbl-row:hover { background-color: rgba(99,102,241,0.06); }
+  .dark .tbl-row:hover { background-color: rgba(99,102,241,0.1); }
+  .tbl-alt:nth-child(even) { background-color: rgba(0,0,0,0.04); }
+  .dark .tbl-alt:nth-child(even) { background-color: rgba(255,255,255,0.02); }
+  th { font-size: 11px; letter-spacing: 0.04em; }
+  .kanban-col { min-width: 180px; }
+  .scroll-x { overflow-x: auto; }
+  select, input { outline: none; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+  .dark ::-webkit-scrollbar-thumb { background: #374151; }
+  .sort-icon { display: inline-block; margin-left: 2px; opacity: 0.5; }
+  .badge { display: inline-flex; align-items: center; padding: 1px 6px; border-radius: 3px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+  .trend-up { color: #10b981; }
+  .trend-down { color: #ef4444; }
+  .action-btn { padding: 2px 6px; border-radius: 3px; font-size: 11px; cursor: pointer; }
+  .selected-bar { display: none; }
+  .selected-bar.visible { display: flex; }
+  svg.chart-line { overflow: visible; }
+</style>
+</head>
+<body class="bg-gray-950 text-gray-100 font-sans min-h-screen">
+
+<!-- BANNER -->
+<div class="bg-indigo-900 border-b border-indigo-700 text-indigo-100 text-center py-1 text-xs font-mono">
+  Option B: Dense Data-Centric — High density, Retool/Stripe aesthetic
+</div>
+
+<!-- TOP NAV -->
+<header class="bg-gray-900 border-b border-gray-800 px-4 flex items-center justify-between" style="height:40px;">
+  <div class="flex items-center gap-1 text-xs text-gray-400">
+    <span class="text-gray-200 font-semibold text-sm">Gabo</span>
+    <span class="mx-1 text-gray-600">/</span>
+    <span id="breadcrumb" class="text-gray-300">Dashboard</span>
+  </div>
+  <div class="flex items-center gap-3">
+    <span class="text-xs text-gray-500 mono">v2.4.1</span>
+    <div class="w-px h-4 bg-gray-700"></div>
+    <button onclick="toggleTheme()" class="text-gray-400 hover:text-gray-200 p-1 rounded" title="Toggle theme">
+      <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    </button>
+    <div class="w-6 h-6 rounded-full bg-indigo-700 flex items-center justify-center text-xs font-semibold">A</div>
+  </div>
+</header>
+
+<!-- TAB NAV -->
+<nav class="bg-gray-900 border-b border-gray-800 px-4 flex items-center gap-0">
+  <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn px-4 py-2 text-xs font-medium border-b-2 border-indigo-500 text-indigo-400">Dashboard</button>
+  <button onclick="switchTab('leads')" id="tab-leads" class="tab-btn px-4 py-2 text-xs font-medium border-b-2 border-transparent text-gray-400 hover:text-gray-200">Leads</button>
+  <button onclick="switchTab('costs')" id="tab-costs" class="tab-btn px-4 py-2 text-xs font-medium border-b-2 border-transparent text-gray-400 hover:text-gray-200">Costs</button>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="p-4">
+
+<!-- ======================== DASHBOARD ======================== -->
+<div id="view-dashboard">
+  <!-- Stats Row -->
+  <div class="grid grid-cols-6 gap-2 mb-3">
+    <div class="bg-gray-900 border border-gray-800 rounded p-3">
+      <div class="text-xs text-gray-500 mb-1">Total Orgs</div>
+      <div class="text-xl font-bold mono">24</div>
+      <div class="text-xs trend-up mt-1">▲ 2 this month</div>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded p-3">
+      <div class="text-xs text-gray-500 mb-1">Active Users</div>
+      <div class="text-xl font-bold mono">156</div>
+      <div class="text-xs trend-up mt-1">▲ 12 this week</div>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded p-3">
+      <div class="text-xs text-gray-500 mb-1">Total Leads</div>
+      <div class="text-xl font-bold mono">1,247</div>
+      <div class="text-xs trend-up mt-1">▲ 8.3% MoM</div>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded p-3">
+      <div class="text-xs text-gray-500 mb-1">Monthly Cost</div>
+      <div class="text-xl font-bold mono">$4,832</div>
+      <div class="text-xs trend-down mt-1">▼ 2.1% MoM</div>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded p-3">
+      <div class="text-xs text-gray-500 mb-1">Active Convos</div>
+      <div class="text-xl font-bold mono">89</div>
+      <div class="text-xs text-gray-500 mt-1">— stable</div>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded p-3">
+      <div class="text-xs text-gray-500 mb-1">Conv Rate</div>
+      <div class="text-xl font-bold mono">12.4%</div>
+      <div class="text-xs trend-up mt-1">▲ 1.2pp MoM</div>
+    </div>
+  </div>
+
+  <!-- System Health -->
+  <div class="flex items-center gap-4 mb-3 bg-gray-900 border border-gray-800 rounded px-3 py-2">
+    <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">System</span>
+    <div class="flex items-center gap-1.5">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+      <span class="text-xs text-gray-300">API</span>
+      <span class="text-xs text-emerald-400 mono">99.9%</span>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+      <span class="text-xs text-gray-300">Webhooks</span>
+      <span class="text-xs text-emerald-400 mono">100%</span>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <span class="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block"></span>
+      <span class="text-xs text-gray-300">Queue</span>
+      <span class="text-xs text-amber-400 mono">142 pending</span>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+      <span class="text-xs text-gray-300">WA Gateway</span>
+      <span class="text-xs text-emerald-400 mono">operational</span>
+    </div>
+    <div class="ml-auto text-xs text-gray-600 mono">Updated 2m ago</div>
+  </div>
+
+  <div class="grid grid-cols-3 gap-3">
+    <!-- Recent Activity -->
+    <div class="col-span-2 bg-gray-900 border border-gray-800 rounded">
+      <div class="px-3 py-2 border-b border-gray-800 flex items-center justify-between">
+        <span class="text-xs font-semibold text-gray-300 uppercase tracking-wider">Recent Activity</span>
+        <button class="text-xs text-indigo-400 hover:text-indigo-300">View all</button>
+      </div>
+      <div class="divide-y divide-gray-800">
+        <div class="grid px-3 py-1.5 tbl-row" style="grid-template-columns:120px 80px 1fr 100px;">
+          <span class="mono text-gray-500 text-xs">17 Mar 09:41</span>
+          <span class="badge bg-emerald-900 text-emerald-300">lead</span>
+          <span class="text-gray-300 truncate">New lead created: Budi Santoso via WhatsApp — PT Maju Bersama</span>
+          <span class="text-right text-gray-500 text-xs">by system</span>
+        </div>
+        <div class="grid px-3 py-1.5 tbl-row" style="grid-template-columns:120px 80px 1fr 100px;">
+          <span class="mono text-gray-500 text-xs">17 Mar 09:38</span>
+          <span class="badge bg-blue-900 text-blue-300">cost</span>
+          <span class="text-gray-300 truncate">AI cost threshold exceeded: Org "Tokopedia CX" at $892/mo</span>
+          <span class="text-right text-gray-500 text-xs">by system</span>
+        </div>
+        <div class="grid px-3 py-1.5 tbl-row" style="grid-template-columns:120px 80px 1fr 100px;">
+          <span class="mono text-gray-500 text-xs">17 Mar 09:22</span>
+          <span class="badge bg-indigo-900 text-indigo-300">user</span>
+          <span class="text-gray-300 truncate">User login: rina.kusuma@gojek.com from 103.28.14.52 (Jakarta)</span>
+          <span class="text-right text-gray-500 text-xs">by user</span>
+        </div>
+        <div class="grid px-3 py-1.5 tbl-row" style="grid-template-columns:120px 80px 1fr 100px;">
+          <span class="mono text-gray-500 text-xs">17 Mar 09:15</span>
+          <span class="badge bg-amber-900 text-amber-300">config</span>
+          <span class="text-gray-300 truncate">Webhook config updated: 360dialog endpoint changed — Org #7</span>
+          <span class="text-right text-gray-500 text-xs">by admin</span>
+        </div>
+        <div class="grid px-3 py-1.5 tbl-row" style="grid-template-columns:120px 80px 1fr 100px;">
+          <span class="mono text-gray-500 text-xs">17 Mar 08:57</span>
+          <span class="badge bg-emerald-900 text-emerald-300">lead</span>
+          <span class="text-gray-300 truncate">Stage change: Siti Rahayu → Qualified (score 87) — Bukalapak</span>
+          <span class="text-right text-gray-500 text-xs">by agent</span>
+        </div>
+        <div class="grid px-3 py-1.5 tbl-row" style="grid-template-columns:120px 80px 1fr 100px;">
+          <span class="mono text-gray-500 text-xs">17 Mar 08:41</span>
+          <span class="badge bg-red-900 text-red-300">error</span>
+          <span class="text-gray-300 truncate">Webhook delivery failed (3x): Org "PT Sinar Harapan" — retrying</span>
+          <span class="text-right text-gray-500 text-xs">by system</span>
+        </div>
+        <div class="grid px-3 py-1.5 tbl-row" style="grid-template-columns:120px 80px 1fr 100px;">
+          <span class="mono text-gray-500 text-xs">17 Mar 08:30</span>
+          <span class="badge bg-purple-900 text-purple-300">org</span>
+          <span class="text-gray-300 truncate">New org onboarded: CV Teknologi Nusantara (plan: Pro)</span>
+          <span class="text-right text-gray-500 text-xs">by admin</span>
+        </div>
+        <div class="grid px-3 py-1.5 tbl-row" style="grid-template-columns:120px 80px 1fr 100px;">
+          <span class="mono text-gray-500 text-xs">17 Mar 08:12</span>
+          <span class="badge bg-blue-900 text-blue-300">cost</span>
+          <span class="text-gray-300 truncate">Monthly billing cycle started — 24 orgs queued for invoicing</span>
+          <span class="text-right text-gray-500 text-xs">by system</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats Column -->
+    <div class="space-y-2">
+      <div class="bg-gray-900 border border-gray-800 rounded p-3">
+        <div class="text-xs text-gray-500 mb-2 uppercase tracking-wider font-medium">Top Orgs by Leads</div>
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-300">Gojek CX</span>
+            <span class="mono text-xs text-gray-400">312</span>
+          </div>
+          <div class="w-full bg-gray-800 rounded-full h-1"><div class="bg-indigo-500 h-1 rounded-full" style="width:100%"></div></div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-300">Tokopedia</span>
+            <span class="mono text-xs text-gray-400">247</span>
+          </div>
+          <div class="w-full bg-gray-800 rounded-full h-1"><div class="bg-indigo-500 h-1 rounded-full" style="width:79%"></div></div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-300">Bukalapak</span>
+            <span class="mono text-xs text-gray-400">189</span>
+          </div>
+          <div class="w-full bg-gray-800 rounded-full h-1"><div class="bg-indigo-500 h-1 rounded-full" style="width:61%"></div></div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-300">Shopee ID</span>
+            <span class="mono text-xs text-gray-400">156</span>
+          </div>
+          <div class="w-full bg-gray-800 rounded-full h-1"><div class="bg-indigo-500 h-1 rounded-full" style="width:50%"></div></div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-300">Lazada ID</span>
+            <span class="mono text-xs text-gray-400">98</span>
+          </div>
+          <div class="w-full bg-gray-800 rounded-full h-1"><div class="bg-indigo-500 h-1 rounded-full" style="width:31%"></div></div>
+        </div>
+      </div>
+      <div class="bg-gray-900 border border-gray-800 rounded p-3">
+        <div class="text-xs text-gray-500 mb-2 uppercase tracking-wider font-medium">Lead Sources</div>
+        <div class="space-y-1">
+          <div class="flex justify-between items-center py-0.5">
+            <span class="text-xs text-gray-300">WhatsApp</span>
+            <div class="flex items-center gap-2"><span class="mono text-xs text-gray-400">62%</span><span class="text-xs text-emerald-400">▲</span></div>
+          </div>
+          <div class="flex justify-between items-center py-0.5">
+            <span class="text-xs text-gray-300">Web Form</span>
+            <div class="flex items-center gap-2"><span class="mono text-xs text-gray-400">21%</span><span class="text-xs text-gray-500">—</span></div>
+          </div>
+          <div class="flex justify-between items-center py-0.5">
+            <span class="text-xs text-gray-300">Instagram</span>
+            <div class="flex items-center gap-2"><span class="mono text-xs text-gray-400">10%</span><span class="text-xs text-emerald-400">▲</span></div>
+          </div>
+          <div class="flex justify-between items-center py-0.5">
+            <span class="text-xs text-gray-300">Referral</span>
+            <div class="flex items-center gap-2"><span class="mono text-xs text-gray-400">7%</span><span class="text-xs text-red-400">▼</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== LEADS ======================== -->
+<div id="view-leads" class="hidden">
+  <div class="flex items-center justify-between mb-2">
+    <div class="flex items-center gap-2">
+      <h2 class="text-sm font-semibold text-gray-200">Leads</h2>
+      <span class="mono text-xs text-gray-500">1,247 total</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5 rounded font-medium">+ Add Lead</button>
+      <div class="flex items-center bg-gray-800 border border-gray-700 rounded overflow-hidden">
+        <button onclick="switchLeadView('table')" id="lead-view-table" class="px-2 py-1.5 text-gray-300 bg-gray-700" title="Table">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        </button>
+        <button onclick="switchLeadView('pipeline')" id="lead-view-pipeline" class="px-2 py-1.5 text-gray-500 hover:text-gray-300" title="Pipeline">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="18" rx="1"/><rect x="17" y="3" width="5" height="18" rx="1"/></svg>
+        </button>
+        <button onclick="switchLeadView('funnel')" id="lead-view-funnel" class="px-2 py-1.5 text-gray-500 hover:text-gray-300" title="Funnel">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lead Sub-tabs -->
+  <div class="flex border-b border-gray-800 mb-2 gap-0">
+    <button onclick="switchLeadTab('table')" id="ltab-table" class="px-3 py-1.5 text-xs border-b-2 border-indigo-500 text-indigo-400">Table</button>
+    <button onclick="switchLeadTab('pipeline')" id="ltab-pipeline" class="px-3 py-1.5 text-xs border-b-2 border-transparent text-gray-400 hover:text-gray-200">Pipeline</button>
+    <button onclick="switchLeadTab('funnel')" id="ltab-funnel" class="px-3 py-1.5 text-xs border-b-2 border-transparent text-gray-400 hover:text-gray-200">Funnel</button>
+  </div>
+
+  <!-- TABLE VIEW -->
+  <div id="lead-table-view">
+    <!-- Filter Bar -->
+    <div class="flex items-center gap-2 mb-2 flex-wrap">
+      <input type="text" placeholder="Search leads..." class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-300 placeholder-gray-600 w-44 focus:border-indigo-500">
+      <select class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-300 focus:border-indigo-500">
+        <option>All Stages</option><option>New</option><option>Contacted</option><option>Qualified</option><option>Negotiation</option><option>Won</option><option>Lost</option>
+      </select>
+      <select class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-300 focus:border-indigo-500">
+        <option>All Sources</option><option>WhatsApp</option><option>Web Form</option><option>Instagram</option><option>Referral</option>
+      </select>
+      <select class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-300 focus:border-indigo-500">
+        <option>All Agents</option><option>Rina K.</option><option>Budi S.</option><option>Dewi P.</option><option>Agus M.</option>
+      </select>
+      <select class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-300 focus:border-indigo-500">
+        <option>All Orgs</option><option>Gojek CX</option><option>Tokopedia</option><option>Bukalapak</option>
+      </select>
+      <span class="ml-auto text-xs text-gray-500 mono">247 results</span>
+    </div>
+
+    <!-- Selected Bar -->
+    <div id="selected-bar" class="selected-bar items-center gap-3 bg-indigo-900 border border-indigo-700 rounded px-3 py-1.5 mb-2 text-xs">
+      <span class="text-indigo-200 font-medium"><span id="sel-count">0</span> selected</span>
+      <span class="text-indigo-600">—</span>
+      <button class="text-indigo-300 hover:text-white">Change Stage</button>
+      <button class="text-indigo-300 hover:text-white">Reassign</button>
+      <button class="text-indigo-300 hover:text-white">Export</button>
+      <button class="text-red-400 hover:text-red-300">Delete</button>
+      <button onclick="clearSelection()" class="ml-auto text-indigo-400 hover:text-indigo-200">✕</button>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-gray-900 border border-gray-800 rounded scroll-x">
+      <table class="w-full" style="min-width:1100px;">
+        <thead class="bg-gray-800 sticky top-0">
+          <tr>
+            <th class="px-2 py-2 text-left"><input type="checkbox" id="check-all" onchange="toggleAll(this)" class="w-3 h-3 accent-indigo-500"></th>
+            <th class="px-2 py-2 text-left text-gray-400 uppercase">Name <span class="sort-icon">↕</span></th>
+            <th class="px-2 py-2 text-left text-gray-400 uppercase">Phone</th>
+            <th class="px-2 py-2 text-left text-gray-400 uppercase">Email</th>
+            <th class="px-2 py-2 text-left text-gray-400 uppercase">Source</th>
+            <th class="px-2 py-2 text-left text-gray-400 uppercase">Stage <span class="sort-icon">↕</span></th>
+            <th class="px-2 py-2 text-left text-gray-400 uppercase">Score <span class="sort-icon">↕</span></th>
+            <th class="px-2 py-2 text-left text-gray-400 uppercase">Assigned</th>
+            <th class="px-2 py-2 text-left text-gray-400 uppercase">Last Active <span class="sort-icon">↕</span></th>
+            <th class="px-2 py-2 text-left text-gray-400 uppercase">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="leads-tbody">
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex items-center justify-between mt-2">
+      <span class="text-xs text-gray-500 mono">1–25 of 247</span>
+      <div class="flex items-center gap-1">
+        <button class="action-btn bg-gray-800 text-gray-400 hover:bg-gray-700">«</button>
+        <button class="action-btn bg-indigo-700 text-white">1</button>
+        <button class="action-btn bg-gray-800 text-gray-400 hover:bg-gray-700">2</button>
+        <button class="action-btn bg-gray-800 text-gray-400 hover:bg-gray-700">3</button>
+        <span class="text-xs text-gray-600">...</span>
+        <button class="action-btn bg-gray-800 text-gray-400 hover:bg-gray-700">10</button>
+        <button class="action-btn bg-gray-800 text-gray-400 hover:bg-gray-700">»</button>
+      </div>
+      <select class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-300">
+        <option>25 / page</option><option>50 / page</option><option>100 / page</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- PIPELINE VIEW -->
+  <div id="lead-pipeline-view" class="hidden">
+    <div class="flex gap-2 scroll-x pb-2" style="min-width:1100px;">
+    </div>
+  </div>
+
+  <!-- FUNNEL VIEW -->
+  <div id="lead-funnel-view" class="hidden">
+    <div class="bg-gray-900 border border-gray-800 rounded p-6">
+      <div class="text-xs text-gray-500 uppercase tracking-wider mb-4 font-medium">Lead Conversion Funnel</div>
+      <div id="funnel-container" class="space-y-2"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== COSTS ======================== -->
+<div id="view-costs" class="hidden">
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="text-sm font-semibold text-gray-200">Costs</h2>
+    <select class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-300 focus:border-indigo-500">
+      <option>Last 30d</option><option>Last 7d</option><option>Last 90d</option><option>Last 6mo</option><option>Custom</option>
+    </select>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="grid grid-cols-6 gap-2 mb-3">
+    <div class="bg-gray-900 border border-gray-800 rounded p-3">
+      <div class="text-xs text-gray-500 mb-1">Total</div>
+      <div class="text-lg font-bold mono">$4,832</div>
+      <div class="text-xs trend-down mt-1">▼ 2.1% MoM</div>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded p-3">
+      <div class="text-xs text-gray-500 mb-1">WhatsApp</div>
+      <div class="text-lg font-bold mono">$1,245</div>
+      <div class="text-xs trend-up mt-1">▲ 5.3% MoM</div>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded p-3">
+      <div class="text-xs text-gray-500 mb-1">AI (LLM)</div>
+      <div class="text-lg font-bold mono">$2,890</div>
+      <div class="text-xs trend-down mt-1">▼ 4.7% MoM</div>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded p-3">
+      <div class="text-xs text-gray-500 mb-1">Voice</div>
+      <div class="text-lg font-bold mono">$697</div>
+      <div class="text-xs trend-up mt-1">▲ 12.1% MoM</div>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded p-3">
+      <div class="text-xs text-gray-500 mb-1">$/Lead</div>
+      <div class="text-lg font-bold mono">$3.87</div>
+      <div class="text-xs trend-down mt-1">▼ 0.3 MoM</div>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded p-3">
+      <div class="text-xs text-gray-500 mb-1">$/Conv</div>
+      <div class="text-lg font-bold mono">$1.24</div>
+      <div class="text-xs trend-down mt-1">▼ 0.08 MoM</div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="grid grid-cols-3 gap-3 mb-3">
+    <!-- Line Chart -->
+    <div class="col-span-2 bg-gray-900 border border-gray-800 rounded p-3">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-semibold text-gray-300 uppercase tracking-wider">Cost Trend (6mo)</span>
+        <div class="flex items-center gap-3 text-xs">
+          <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-indigo-400 inline-block"></span> Total</span>
+          <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-emerald-400 inline-block"></span> AI</span>
+          <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-amber-400 inline-block"></span> WA</span>
+        </div>
+      </div>
+      <svg class="chart-line w-full" style="height:140px;" viewBox="0 0 600 140">
+        <defs>
+          <linearGradient id="grad-total" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#6366f1" stop-opacity="0.2"/>
+            <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- Grid lines -->
+        <line x1="0" y1="20" x2="600" y2="20" stroke="#374151" stroke-width="0.5"/>
+        <line x1="0" y1="50" x2="600" y2="50" stroke="#374151" stroke-width="0.5"/>
+        <line x1="0" y1="80" x2="600" y2="80" stroke="#374151" stroke-width="0.5"/>
+        <line x1="0" y1="110" x2="600" y2="110" stroke="#374151" stroke-width="0.5"/>
+        <!-- Y labels -->
+        <text x="2" y="18" fill="#6b7280" font-size="8" font-family="IBM Plex Mono">6k</text>
+        <text x="2" y="48" fill="#6b7280" font-size="8" font-family="IBM Plex Mono">5k</text>
+        <text x="2" y="78" fill="#6b7280" font-size="8" font-family="IBM Plex Mono">4k</text>
+        <text x="2" y="108" fill="#6b7280" font-size="8" font-family="IBM Plex Mono">3k</text>
+        <!-- X labels -->
+        <text x="60" y="132" fill="#6b7280" font-size="8" font-family="IBM Plex Mono" text-anchor="middle">Oct</text>
+        <text x="160" y="132" fill="#6b7280" font-size="8" font-family="IBM Plex Mono" text-anchor="middle">Nov</text>
+        <text x="260" y="132" fill="#6b7280" font-size="8" font-family="IBM Plex Mono" text-anchor="middle">Dec</text>
+        <text x="360" y="132" fill="#6b7280" font-size="8" font-family="IBM Plex Mono" text-anchor="middle">Jan</text>
+        <text x="460" y="132" fill="#6b7280" font-size="8" font-family="IBM Plex Mono" text-anchor="middle">Feb</text>
+        <text x="560" y="132" fill="#6b7280" font-size="8" font-family="IBM Plex Mono" text-anchor="middle">Mar</text>
+        <!-- Total line area fill -->
+        <polygon points="60,72 160,62 260,55 360,68 460,52 560,58 560,120 60,120" fill="url(#grad-total)"/>
+        <!-- Total line -->
+        <polyline points="60,72 160,62 260,55 360,68 460,52 560,58" fill="none" stroke="#6366f1" stroke-width="2"/>
+        <!-- AI line -->
+        <polyline points="60,90 160,82 260,75 360,85 460,68 560,72" fill="none" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,2"/>
+        <!-- WA line -->
+        <polyline points="60,100 160,96 260,92 360,98 460,88 560,95" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="2,3"/>
+        <!-- Dots -->
+        <circle cx="60" cy="72" r="3" fill="#6366f1"/>
+        <circle cx="160" cy="62" r="3" fill="#6366f1"/>
+        <circle cx="260" cy="55" r="3" fill="#6366f1"/>
+        <circle cx="360" cy="68" r="3" fill="#6366f1"/>
+        <circle cx="460" cy="52" r="3" fill="#6366f1"/>
+        <circle cx="560" cy="58" r="3" fill="#6366f1"/>
+      </svg>
+    </div>
+
+    <!-- Donut Chart -->
+    <div class="bg-gray-900 border border-gray-800 rounded p-3">
+      <div class="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Cost Breakdown</div>
+      <div class="flex items-center justify-center mb-2">
+        <svg viewBox="0 0 100 100" width="110" height="110">
+          <!-- Donut: WA 26%, AI 60%, Voice 14% -->
+          <!-- AI: 216deg (60%) from 90deg -->
+          <circle cx="50" cy="50" r="35" fill="none" stroke="#10b981" stroke-width="14"
+            stroke-dasharray="131.9 87.96" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
+          <!-- WA: 93.6deg (26%) -->
+          <circle cx="50" cy="50" r="35" fill="none" stroke="#f59e0b" stroke-width="14"
+            stroke-dasharray="57.1 162.76" stroke-dashoffset="-131.9" transform="rotate(-90 50 50)"/>
+          <!-- Voice: 14% -->
+          <circle cx="50" cy="50" r="35" fill="none" stroke="#a78bfa" stroke-width="14"
+            stroke-dasharray="30.8 189.0" stroke-dashoffset="-189.0" transform="rotate(-90 50 50)"/>
+          <circle cx="50" cy="50" r="28" fill="#111827"/>
+          <text x="50" y="47" fill="#f3f4f6" font-size="10" font-weight="bold" text-anchor="middle" font-family="IBM Plex Mono">$4,832</text>
+          <text x="50" y="57" fill="#6b7280" font-size="7" text-anchor="middle" font-family="IBM Plex Sans">total</text>
+        </svg>
+      </div>
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between text-xs">
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm bg-emerald-400 inline-block"></span><span class="text-gray-300">AI (LLM)</span></div>
+          <span class="mono text-gray-400">$2,890 <span class="text-gray-600">60%</span></span>
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm bg-amber-400 inline-block"></span><span class="text-gray-300">WhatsApp</span></div>
+          <span class="mono text-gray-400">$1,245 <span class="text-gray-600">26%</span></span>
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm bg-violet-400 inline-block"></span><span class="text-gray-300">Voice</span></div>
+          <span class="mono text-gray-400">$697 <span class="text-gray-600">14%</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Per-org Cost Table -->
+  <div class="bg-gray-900 border border-gray-800 rounded">
+    <div class="px-3 py-2 border-b border-gray-800 flex items-center justify-between">
+      <span class="text-xs font-semibold text-gray-300 uppercase tracking-wider">Per-Org Cost Breakdown</span>
+      <button class="text-xs text-indigo-400 hover:text-indigo-300">Export CSV</button>
+    </div>
+    <div class="scroll-x">
+      <table class="w-full">
+        <thead class="bg-gray-800">
+          <tr>
+            <th class="px-3 py-2 text-left text-gray-400 uppercase">Organization <span class="sort-icon">↕</span></th>
+            <th class="px-3 py-2 text-right text-gray-400 uppercase">WhatsApp <span class="sort-icon">↕</span></th>
+            <th class="px-3 py-2 text-right text-gray-400 uppercase">AI (LLM) <span class="sort-icon">↕</span></th>
+            <th class="px-3 py-2 text-right text-gray-400 uppercase">Voice <span class="sort-icon">↕</span></th>
+            <th class="px-3 py-2 text-right text-gray-400 uppercase">Total <span class="sort-icon">↕</span></th>
+            <th class="px-3 py-2 text-right text-gray-400 uppercase">MoM Δ</th>
+          </tr>
+        </thead>
+        <tbody id="cost-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ============ DATA ============
+const leads = [
+  {name:'Budi Santoso',phone:'+62 812-3456-7890',email:'budi.s@ptmaju.co.id',source:'WA',stage:'New',score:45,agent:'Rina K.',last:'2m ago'},
+  {name:'Siti Rahayu',phone:'+62 878-2341-5678',email:'siti.r@bukalapak.com',source:'Form',stage:'Qualified',score:87,agent:'Budi S.',last:'15m ago'},
+  {name:'Ahmad Fauzi',phone:'+62 821-9876-5432',email:'a.fauzi@gojek.id',source:'WA',stage:'Contacted',score:62,agent:'Dewi P.',last:'1h ago'},
+  {name:'Dewi Kartini',phone:'+62 856-7654-3210',email:'dewi.k@shopee.com',source:'IG',stage:'Negotiation',score:91,agent:'Agus M.',last:'3h ago'},
+  {name:'Rizky Pratama',phone:'+62 895-1234-5678',email:'rizky.p@lazada.co.id',source:'WA',stage:'Won',score:95,agent:'Rina K.',last:'5h ago'},
+  {name:'Nurul Hidayah',phone:'+62 813-5678-9012',email:'nurul.h@tokopedia.com',source:'Form',stage:'Contacted',score:58,agent:'Budi S.',last:'6h ago'},
+  {name:'Hendra Wijaya',phone:'+62 877-8901-2345',email:'hendra.w@traveloka.com',source:'Ref',stage:'Lost',score:22,agent:'Dewi P.',last:'8h ago'},
+  {name:'Fitriani Sari',phone:'+62 822-3456-7891',email:'fitri.s@blibli.com',source:'WA',stage:'New',score:38,agent:'Agus M.',last:'9h ago'},
+  {name:'Wahyu Setiawan',phone:'+62 857-6789-0123',email:'wahyu.s@gojek.id',source:'WA',stage:'Qualified',score:79,agent:'Rina K.',last:'10h ago'},
+  {name:'Ratna Dewi',phone:'+62 896-2345-6789',email:'ratna.d@grab.com',source:'IG',stage:'Contacted',score:54,agent:'Budi S.',last:'12h ago'},
+  {name:'Dian Purnama',phone:'+62 814-4567-8901',email:'dian.p@ovo.id',source:'Form',stage:'Negotiation',score:83,agent:'Dewi P.',last:'1d ago'},
+  {name:'Agung Prasetyo',phone:'+62 878-5678-9012',email:'agung.p@dana.id',source:'WA',stage:'Won',score:97,agent:'Agus M.',last:'1d ago'},
+  {name:'Eka Cahyani',phone:'+62 823-6789-0124',email:'eka.c@gopay.com',source:'WA',stage:'New',score:41,agent:'Rina K.',last:'1d ago'},
+  {name:'Fajar Nugroho',phone:'+62 858-7890-1235',email:'fajar.n@linkaja.id',source:'Ref',stage:'Contacted',score:67,agent:'Budi S.',last:'2d ago'},
+  {name:'Intan Permata',phone:'+62 897-3456-7890',email:'intan.p@bibit.id',source:'WA',stage:'Qualified',score:74,agent:'Dewi P.',last:'2d ago'},
+  {name:'Joko Widodo',phone:'+62 815-5678-9012',email:'joko.w@kredivo.com',source:'Form',stage:'Lost',score:18,agent:'Agus M.',last:'2d ago'},
+  {name:'Kartika Sari',phone:'+62 879-6789-0123',email:'kartika.s@akulaku.com',source:'WA',stage:'New',score:33,agent:'Rina K.',last:'3d ago'},
+  {name:'Lukman Hakim',phone:'+62 824-7890-1234',email:'lukman.h@amartha.com',source:'IG',stage:'Contacted',score:60,agent:'Budi S.',last:'3d ago'},
+  {name:'Maya Indah',phone:'+62 859-8901-2345',email:'maya.i@modalrakyat.id',source:'WA',stage:'Qualified',score:81,agent:'Dewi P.',last:'3d ago'},
+  {name:'Nanda Putra',phone:'+62 898-4567-8901',email:'nanda.p@cicil.co.id',source:'Form',stage:'Negotiation',score:88,agent:'Agus M.',last:'4d ago'},
+  {name:'Oki Setiawan',phone:'+62 816-6789-0123',email:'oki.s@investree.id',source:'WA',stage:'Won',score:93,agent:'Rina K.',last:'4d ago'},
+  {name:'Putri Handayani',phone:'+62 880-7890-1234',email:'putri.h@akseleran.co.id',source:'Ref',stage:'New',score:29,agent:'Budi S.',last:'5d ago'},
+  {name:'Qori Rahmad',phone:'+62 825-8901-2345',email:'qori.r@finplusid.com',source:'WA',stage:'Contacted',score:55,agent:'Dewi P.',last:'5d ago'},
+  {name:'Rini Astuti',phone:'+62 860-9012-3456',email:'rini.a@shopback.com',source:'IG',stage:'Qualified',score:76,agent:'Agus M.',last:'6d ago'},
+  {name:'Surya Adi',phone:'+62 899-5678-9012',email:'surya.a@cashbac.com',source:'WA',stage:'Negotiation',score:85,agent:'Rina K.',last:'6d ago'},
+];
+
+const stages = {
+  'New': {bg:'bg-blue-900 text-blue-300'},
+  'Contacted': {bg:'bg-cyan-900 text-cyan-300'},
+  'Qualified': {bg:'bg-violet-900 text-violet-300'},
+  'Negotiation': {bg:'bg-amber-900 text-amber-300'},
+  'Won': {bg:'bg-emerald-900 text-emerald-300'},
+  'Lost': {bg:'bg-red-900 text-red-300'},
+};
+
+const sources = {
+  'WA': 'bg-green-900 text-green-300',
+  'Form': 'bg-blue-900 text-blue-300',
+  'IG': 'bg-pink-900 text-pink-300',
+  'Ref': 'bg-purple-900 text-purple-300',
+};
+
+function scoreColor(s) {
+  if (s >= 80) return 'bg-emerald-900 text-emerald-300';
+  if (s >= 60) return 'bg-amber-900 text-amber-300';
+  return 'bg-red-900 text-red-300';
+}
+
+// ============ RENDER LEADS TABLE ============
+function renderLeadsTable() {
+  const tbody = document.getElementById('leads-tbody');
+  tbody.innerHTML = leads.map((l, i) => `
+    <tr class="tbl-row tbl-alt border-b border-gray-800">
+      <td class="px-2 py-1.5"><input type="checkbox" class="row-check w-3 h-3 accent-indigo-500" onchange="updateSelection()" data-i="${i}"></td>
+      <td class="px-2 py-1.5 font-medium text-gray-200 whitespace-nowrap">${l.name}</td>
+      <td class="px-2 py-1.5 mono text-gray-400 whitespace-nowrap text-xs">${l.phone}</td>
+      <td class="px-2 py-1.5 text-gray-400 text-xs truncate" style="max-width:160px;">${l.email}</td>
+      <td class="px-2 py-1.5"><span class="badge ${sources[l.source]}">${l.source}</span></td>
+      <td class="px-2 py-1.5"><span class="badge ${stages[l.stage].bg}">${l.stage}</span></td>
+      <td class="px-2 py-1.5"><span class="badge ${scoreColor(l.score)} mono">${l.score}</span></td>
+      <td class="px-2 py-1.5 text-gray-400 text-xs whitespace-nowrap">${l.agent}</td>
+      <td class="px-2 py-1.5 mono text-gray-500 text-xs whitespace-nowrap">${l.last}</td>
+      <td class="px-2 py-1.5">
+        <div class="flex items-center gap-1">
+          <button class="action-btn bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200" title="View">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button class="action-btn bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200" title="Edit">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="action-btn bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-indigo-300" title="Message">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ============ RENDER PIPELINE ============
+function renderPipeline() {
+  const cols = ['New','Contacted','Qualified','Negotiation','Won','Lost'];
+  const stageColors = {
+    'New':'border-blue-700','Contacted':'border-cyan-700','Qualified':'border-violet-700',
+    'Negotiation':'border-amber-700','Won':'border-emerald-700','Lost':'border-red-700'
+  };
+  const container = document.querySelector('#lead-pipeline-view > div');
+  container.innerHTML = cols.map(col => {
+    const colLeads = leads.filter(l => l.stage === col);
+    return `
+      <div class="kanban-col bg-gray-900 border border-gray-800 rounded flex-shrink-0" style="min-width:190px;">
+        <div class="px-2 py-1.5 border-b border-gray-800 flex items-center justify-between">
+          <span class="text-xs font-semibold text-gray-300">${col}</span>
+          <span class="mono text-xs text-gray-500">(${colLeads.length})</span>
+        </div>
+        <div class="p-1.5 space-y-1">
+          ${colLeads.map(l => `
+            <div class="bg-gray-800 border ${stageColors[col]} border-opacity-30 rounded px-2 py-1.5 hover:border-opacity-60 cursor-pointer transition-all">
+              <div class="text-xs font-medium text-gray-200 truncate">${l.name}</div>
+              <div class="flex items-center justify-between mt-0.5">
+                <span class="text-xs text-gray-500 mono">${l.agent}</span>
+                <span class="badge ${scoreColor(l.score)} mono text-xs px-1 py-0">${l.score}</span>
+              </div>
+            </div>
+          `).join('')}
+          <div class="text-center py-1">
+            <button class="text-xs text-gray-600 hover:text-gray-400">+ Add card</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============ RENDER FUNNEL ============
+function renderFunnel() {
+  const funnelData = [
+    {stage:'New',count:247,pct:100,color:'bg-blue-500'},
+    {stage:'Contacted',count:189,pct:77,color:'bg-cyan-500'},
+    {stage:'Qualified',count:124,pct:50,color:'bg-violet-500'},
+    {stage:'Negotiation',count:68,pct:28,color:'bg-amber-500'},
+    {stage:'Won',count:31,pct:13,color:'bg-emerald-500'},
+  ];
+  const container = document.getElementById('funnel-container');
+  container.innerHTML = funnelData.map((f, i) => {
+    const conv = i > 0 ? ((f.count / funnelData[i-1].count) * 100).toFixed(0) + '% from prev' : '100% start';
+    return `
+      <div class="flex items-center gap-3">
+        <div class="w-24 text-right text-xs text-gray-400 font-medium shrink-0">${f.stage}</div>
+        <div class="flex-1 relative">
+          <div class="bg-gray-800 rounded h-7 overflow-hidden">
+            <div class="${f.color} h-full rounded transition-all flex items-center px-3" style="width:${f.pct}%;">
+              <span class="text-xs font-bold text-white mono">${f.count.toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+        <div class="w-28 text-xs mono text-gray-500 shrink-0">${conv}</div>
+        <div class="w-8 text-right text-xs mono text-gray-400 shrink-0">${f.pct}%</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============ RENDER COSTS TABLE ============
+function renderCostTable() {
+  const orgs = [
+    {name:'Gojek CX',wa:312,ai:723,voice:147,mom:'+8.2%',up:true},
+    {name:'Tokopedia',wa:287,ai:892,voice:0,mom:'+12.4%',up:true},
+    {name:'Bukalapak',wa:198,ai:445,voice:87,mom:'-3.1%',up:false},
+    {name:'Shopee ID',wa:156,ai:334,voice:120,mom:'+5.7%',up:true},
+    {name:'Lazada ID',wa:89,ai:201,voice:43,mom:'-1.2%',up:false},
+    {name:'Traveloka',wa:67,ai:178,voice:234,mom:'+18.9%',up:true},
+    {name:'OVO',wa:45,ai:89,voice:0,mom:'-0.4%',up:false},
+    {name:'DANA',wa:34,ai:67,voice:28,mom:'+2.3%',up:true},
+    {name:'GoPay',wa:28,ai:54,voice:0,mom:'-5.6%',up:false},
+    {name:'LinkAja',wa:19,ai:43,voice:15,mom:'+0.8%',up:true},
+    {name:'Kredivo',wa:7,ai:28,voice:0,mom:'-11.3%',up:false},
+    {name:'Amartha',wa:3,ai:36,voice:23,mom:'+4.2%',up:true},
+  ];
+  const tbody = document.getElementById('cost-tbody');
+  tbody.innerHTML = orgs.map((o, i) => {
+    const total = o.wa + o.ai + o.voice;
+    const momColor = o.up ? 'text-emerald-400' : 'text-red-400';
+    return `
+      <tr class="tbl-row tbl-alt border-b border-gray-800">
+        <td class="px-3 py-1.5 font-medium text-gray-200">${o.name}</td>
+        <td class="px-3 py-1.5 mono text-right text-gray-300">$${o.wa}</td>
+        <td class="px-3 py-1.5 mono text-right text-gray-300">$${o.ai}</td>
+        <td class="px-3 py-1.5 mono text-right text-gray-300">${o.voice ? '$'+o.voice : '<span class="text-gray-600">—</span>'}</td>
+        <td class="px-3 py-1.5 mono text-right font-semibold text-gray-200">$${total}</td>
+        <td class="px-3 py-1.5 mono text-right ${momColor}">${o.mom}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ============ TAB SWITCHING ============
+function switchTab(tab) {
+  ['dashboard','leads','costs'].forEach(t => {
+    document.getElementById('view-'+t).classList.toggle('hidden', t !== tab);
+    const btn = document.getElementById('tab-'+t);
+    btn.classList.toggle('border-indigo-500', t === tab);
+    btn.classList.toggle('text-indigo-400', t === tab);
+    btn.classList.toggle('border-transparent', t !== tab);
+    btn.classList.toggle('text-gray-400', t !== tab);
+  });
+  document.getElementById('breadcrumb').textContent = tab.charAt(0).toUpperCase() + tab.slice(1);
+}
+
+function switchLeadTab(tab) {
+  ['table','pipeline','funnel'].forEach(t => {
+    document.getElementById('lead-'+t+'-view').classList.toggle('hidden', t !== tab);
+    const btn = document.getElementById('ltab-'+t);
+    btn.classList.toggle('border-indigo-500', t === tab);
+    btn.classList.toggle('text-indigo-400', t === tab);
+    btn.classList.toggle('border-transparent', t !== tab);
+    btn.classList.toggle('text-gray-400', t !== tab);
+  });
+}
+
+function switchLeadView(v) {
+  switchLeadTab(v);
+  ['table','pipeline','funnel'].forEach(t => {
+    const btn = document.getElementById('lead-view-'+t);
+    if (!btn) return;
+    btn.classList.toggle('bg-gray-700', t === v);
+    btn.classList.toggle('text-gray-300', t === v);
+    btn.classList.toggle('text-gray-500', t !== v);
+  });
+}
+
+// ============ THEME ============
+function toggleTheme() {
+  const html = document.documentElement;
+  html.classList.toggle('dark');
+  const isDark = html.classList.contains('dark');
+  document.body.className = document.body.className
+    .replace(/bg-\S+/, isDark ? 'bg-gray-950' : 'bg-gray-50')
+    .replace(/text-\S+/, isDark ? 'text-gray-100' : 'text-gray-900');
+  if (!isDark) {
+    document.body.style.backgroundColor = '#f9fafb';
+    document.body.style.color = '#111827';
+  } else {
+    document.body.style.backgroundColor = '';
+    document.body.style.color = '';
+  }
+}
+
+// ============ SELECTION ============
+function toggleAll(cb) {
+  document.querySelectorAll('.row-check').forEach(c => c.checked = cb.checked);
+  updateSelection();
+}
+
+function updateSelection() {
+  const checked = document.querySelectorAll('.row-check:checked').length;
+  const bar = document.getElementById('selected-bar');
+  document.getElementById('sel-count').textContent = checked;
+  bar.classList.toggle('visible', checked > 0);
+}
+
+function clearSelection() {
+  document.querySelectorAll('.row-check').forEach(c => c.checked = false);
+  document.getElementById('check-all').checked = false;
+  updateSelection();
+}
+
+// ============ INIT ============
+renderLeadsTable();
+renderPipeline();
+renderFunnel();
+renderCostTable();
+</script>
+</body>
+</html>

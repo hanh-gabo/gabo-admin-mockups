@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gabo Admin — Option C: Analytics-First</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { font-family: 'Inter', sans-serif; }
+  .mono { font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace; }
+  html.dark { color-scheme: dark; }
+  html.light { color-scheme: light; }
+
+  /* Transitions */
+  .view { display: none; opacity: 0; transition: opacity 0.2s ease; }
+  .view.active { display: block; opacity: 1; }
+  .subview { display: none; }
+  .subview.active { display: block; }
+
+  /* Card glow */
+  .card-glow:hover { box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 8px 32px rgba(0,0,0,0.4); }
+  html.light .card-glow:hover { box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.08); }
+
+  /* Sparkline */
+  .sparkline path { fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .sparkline-area { opacity: 0.15; }
+
+  /* Ring indicator */
+  .ring-svg { transform: rotate(-90deg); }
+  .ring-svg circle { fill: none; stroke-width: 3; }
+
+  /* Table row hover */
+  .trow:hover td { background: rgba(255,255,255,0.03); }
+  html.light .trow:hover td { background: rgba(0,0,0,0.025); }
+
+  /* Area chart */
+  .area-chart path { stroke-width: 2; }
+
+  /* Kanban card hover */
+  .kanban-card:hover { transform: translateY(-1px); }
+
+  /* Subtle scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+  html.light ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); }
+
+  /* Nav tab underline */
+  .nav-tab.active-tab { border-bottom: 1.5px solid currentColor; }
+
+  /* Fade-in animation */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .fade-up { animation: fadeUp 0.3s ease forwards; }
+
+  /* Theme vars */
+  html.dark body { background: #0a0a0a; color: #e5e5e5; }
+  html.light body { background: #fafafa; color: #171717; }
+  html.dark .bg-card { background: #111111; border: 1px solid #1f1f1f; }
+  html.light .bg-card { background: #ffffff; border: 1px solid #e5e5e5; }
+  html.dark .bg-surface { background: #161616; }
+  html.light .bg-surface { background: #f5f5f5; }
+  html.dark .text-muted { color: #737373; }
+  html.light .text-muted { color: #737373; }
+  html.dark .text-secondary { color: #a3a3a3; }
+  html.light .text-secondary { color: #525252; }
+  html.dark .divider { border-color: #1f1f1f; }
+  html.light .divider { border-color: #e5e5e5; }
+  html.dark .nav-bg { background: rgba(10,10,10,0.9); border-bottom: 1px solid #1a1a1a; }
+  html.light .nav-bg { background: rgba(250,250,250,0.9); border-bottom: 1px solid #e5e5e5; }
+  html.dark .input-bg { background: #111; border: 1px solid #262626; color: #e5e5e5; }
+  html.light .input-bg { background: #fff; border: 1px solid #d4d4d4; color: #171717; }
+  html.dark .btn-primary { background: #fff; color: #000; }
+  html.light .btn-primary { background: #000; color: #fff; }
+  html.dark .table-sep { border-bottom: 1px solid #1a1a1a; }
+  html.light .table-sep { border-bottom: 1px solid #f0f0f0; }
+  html.dark .hover-row:hover { background: #161616; }
+  html.light .hover-row:hover { background: #f5f5f5; }
+  html.dark .sub-nav-active { color: #fff; border-bottom: 1.5px solid #fff; }
+  html.light .sub-nav-active { color: #000; border-bottom: 1.5px solid #000; }
+  html.dark .sub-nav-inactive { color: #525252; }
+  html.light .sub-nav-inactive { color: #a3a3a3; }
+  html.dark .period-active { background: #fff; color: #000; }
+  html.light .period-active { background: #000; color: #fff; }
+</style>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: { extend: {} }
+  }
+</script>
+</head>
+<body class="min-h-screen transition-colors duration-300">
+
+<!-- Banner -->
+<div class="text-center py-2 text-xs mono" style="background:#0f172a;color:#64748b;letter-spacing:.05em;">
+  OPTION C: ANALYTICS-FIRST &mdash; SPACIOUS, LINEAR/VERCEL AESTHETIC
+</div>
+
+<!-- Nav -->
+<nav class="nav-bg sticky top-0 z-50 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-6 flex items-center h-14 gap-8">
+    <!-- Logo -->
+    <div class="flex items-center gap-2.5">
+      <div class="w-6 h-6 rounded-md bg-white flex items-center justify-center">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <rect x="1" y="1" width="5" height="5" rx="1" fill="#000"/>
+          <rect x="8" y="1" width="5" height="5" rx="1" fill="#000" opacity=".5"/>
+          <rect x="1" y="8" width="5" height="5" rx="1" fill="#000" opacity=".5"/>
+          <rect x="8" y="8" width="5" height="5" rx="1" fill="#000"/>
+        </svg>
+      </div>
+      <span class="text-sm font-semibold tracking-tight">Gabo Admin</span>
+    </div>
+
+    <!-- Nav Tabs -->
+    <div class="flex items-center gap-1">
+      <button onclick="switchView('dashboard')" id="tab-dashboard"
+        class="nav-tab px-3 py-1.5 text-sm font-medium transition-all duration-150 rounded-md hover:bg-white/5 active-tab"
+        data-view="dashboard">Overview</button>
+      <button onclick="switchView('leads')" id="tab-leads"
+        class="nav-tab px-3 py-1.5 text-sm font-medium transition-all duration-150 rounded-md hover:bg-white/5"
+        data-view="leads">Leads</button>
+      <button onclick="switchView('costs')" id="tab-costs"
+        class="nav-tab px-3 py-1.5 text-sm font-medium transition-all duration-150 rounded-md hover:bg-white/5"
+        data-view="costs">Usage &amp; Costs</button>
+    </div>
+
+    <!-- Spacer -->
+    <div class="flex-1"></div>
+
+    <!-- Right -->
+    <div class="flex items-center gap-3">
+      <span class="text-xs text-muted mono">Mar 17, 2026</span>
+      <button onclick="toggleTheme()" id="theme-toggle" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/5 transition-colors">
+        <svg id="icon-dark" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2a5 5 0 110 10A5 5 0 018 3z" opacity=".3"/>
+          <path d="M6.25 2.5A5.5 5.5 0 1011.5 9.75 4.5 4.5 0 016.25 2.5z"/>
+        </svg>
+        <svg id="icon-light" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="hidden">
+          <circle cx="8" cy="8" r="3"/>
+          <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.54 11.54l1.41 1.41M3.05 12.95l1.42-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center text-white text-xs font-bold">A</div>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== DASHBOARD VIEW ===== -->
+<div id="view-dashboard" class="view active fade-up max-w-7xl mx-auto px-6 py-10">
+
+  <!-- Header -->
+  <div class="mb-10">
+    <h1 class="text-2xl font-semibold tracking-tight mb-1">Overview</h1>
+    <p class="text-muted text-sm">Last 30 days &mdash; <span class="mono">Feb 17 &ndash; Mar 17, 2026</span></p>
+  </div>
+
+  <!-- KPI Grid 2x2 -->
+  <div class="grid grid-cols-2 gap-4 mb-8">
+    <!-- Total Leads -->
+    <div class="bg-card rounded-2xl p-6 card-glow transition-all duration-200">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <p class="text-muted text-xs font-medium uppercase tracking-widest mb-2">Total Leads</p>
+          <p class="mono text-5xl font-bold tracking-tighter">1,247</p>
+        </div>
+        <span class="text-xs font-medium px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 mono">+12%</span>
+      </div>
+      <div class="flex items-end gap-2">
+        <svg class="sparkline" width="100%" height="40" viewBox="0 0 200 40" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#10b981"/>
+              <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path class="sparkline-area" d="M0,32 C20,28 40,20 60,22 C80,24 100,15 120,12 C140,9 160,5 180,8 L200,6 L200,40 L0,40Z" fill="url(#g1)"/>
+          <path d="M0,32 C20,28 40,20 60,22 C80,24 100,15 120,12 C140,9 160,5 180,8 L200,6" stroke="#10b981"/>
+        </svg>
+        <p class="text-muted text-xs whitespace-nowrap">7-day trend</p>
+      </div>
+    </div>
+
+    <!-- Monthly Cost -->
+    <div class="bg-card rounded-2xl p-6 card-glow transition-all duration-200">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <p class="text-muted text-xs font-medium uppercase tracking-widest mb-2">Monthly Cost</p>
+          <p class="mono text-5xl font-bold tracking-tighter">$4,832</p>
+        </div>
+        <span class="text-xs font-medium px-2 py-1 rounded-full bg-red-500/10 text-red-400 mono">-3%</span>
+      </div>
+      <div class="flex items-end gap-2">
+        <svg class="sparkline" width="100%" height="40" viewBox="0 0 200 40" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f59e0b"/>
+              <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path class="sparkline-area" d="M0,10 C20,8 40,14 60,16 C80,18 100,22 120,20 C140,18 160,24 180,26 L200,28 L200,40 L0,40Z" fill="url(#g2)"/>
+          <path d="M0,10 C20,8 40,14 60,16 C80,18 100,22 120,20 C140,18 160,24 180,26 L200,28" stroke="#f59e0b"/>
+        </svg>
+        <p class="text-muted text-xs whitespace-nowrap">7-day trend</p>
+      </div>
+    </div>
+
+    <!-- Active Conversations -->
+    <div class="bg-card rounded-2xl p-6 card-glow transition-all duration-200">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <p class="text-muted text-xs font-medium uppercase tracking-widest mb-2">Active Conversations</p>
+          <p class="mono text-5xl font-bold tracking-tighter">89</p>
+        </div>
+        <span class="text-xs font-medium px-2 py-1 rounded-full bg-blue-500/10 text-blue-400 mono">+8%</span>
+      </div>
+      <div class="flex items-end gap-2">
+        <svg class="sparkline" width="100%" height="40" viewBox="0 0 200 40" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="g3" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path class="sparkline-area" d="M0,30 C20,25 40,28 60,20 C80,12 100,18 120,10 C140,6 160,8 180,5 L200,4 L200,40 L0,40Z" fill="url(#g3)"/>
+          <path d="M0,30 C20,25 40,28 60,20 C80,12 100,18 120,10 C140,6 160,8 180,5 L200,4" stroke="#3b82f6"/>
+        </svg>
+        <p class="text-muted text-xs whitespace-nowrap">7-day trend</p>
+      </div>
+    </div>
+
+    <!-- Conversion Rate -->
+    <div class="bg-card rounded-2xl p-6 card-glow transition-all duration-200">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <p class="text-muted text-xs font-medium uppercase tracking-widest mb-2">Conversion Rate</p>
+          <p class="mono text-5xl font-bold tracking-tighter">12.4%</p>
+        </div>
+        <span class="text-xs font-medium px-2 py-1 rounded-full bg-violet-500/10 text-violet-400 mono">+2.1%</span>
+      </div>
+      <div class="flex items-end gap-2">
+        <svg class="sparkline" width="100%" height="40" viewBox="0 0 200 40" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="g4" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#8b5cf6"/>
+              <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path class="sparkline-area" d="M0,28 C20,26 40,22 60,18 C80,14 100,16 120,12 C140,8 160,10 180,6 L200,4 L200,40 L0,40Z" fill="url(#g4)"/>
+          <path d="M0,28 C20,26 40,22 60,18 C80,14 100,16 120,12 C140,8 160,10 180,6 L200,4" stroke="#8b5cf6"/>
+        </svg>
+        <p class="text-muted text-xs whitespace-nowrap">7-day trend</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2-col charts -->
+  <div class="grid grid-cols-2 gap-4 mb-8">
+    <!-- Lead Sources -->
+    <div class="bg-card rounded-2xl p-6 card-glow transition-all duration-200">
+      <p class="text-xs font-medium text-muted uppercase tracking-widest mb-6">Lead Sources</p>
+      <div class="space-y-4">
+        <div>
+          <div class="flex justify-between text-sm mb-1.5">
+            <span class="font-medium">WhatsApp</span>
+            <span class="mono text-muted">45% &mdash; 561</span>
+          </div>
+          <div class="h-1.5 rounded-full bg-white/5">
+            <div class="h-1.5 rounded-full bg-blue-500 transition-all" style="width:45%"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1.5">
+            <span class="font-medium">Voice</span>
+            <span class="mono text-muted">30% &mdash; 374</span>
+          </div>
+          <div class="h-1.5 rounded-full bg-white/5">
+            <div class="h-1.5 rounded-full bg-violet-500 transition-all" style="width:30%"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1.5">
+            <span class="font-medium">Campaign</span>
+            <span class="mono text-muted">15% &mdash; 187</span>
+          </div>
+          <div class="h-1.5 rounded-full bg-white/5">
+            <div class="h-1.5 rounded-full bg-amber-500 transition-all" style="width:15%"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1.5">
+            <span class="font-medium">Manual</span>
+            <span class="mono text-muted">10% &mdash; 125</span>
+          </div>
+          <div class="h-1.5 rounded-full bg-white/5">
+            <div class="h-1.5 rounded-full bg-emerald-500 transition-all" style="width:10%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cost Breakdown Donut -->
+    <div class="bg-card rounded-2xl p-6 card-glow transition-all duration-200">
+      <p class="text-xs font-medium text-muted uppercase tracking-widest mb-4">Cost Breakdown</p>
+      <div class="flex items-center gap-6">
+        <!-- Donut SVG -->
+        <svg width="100" height="100" viewBox="0 0 100 100" class="flex-shrink-0">
+          <circle cx="50" cy="50" r="38" fill="none" stroke="#1f1f1f" stroke-width="14"/>
+          <!-- AI: 60% = 239.4deg -->
+          <circle cx="50" cy="50" r="38" fill="none" stroke="#3b82f6" stroke-width="14"
+            stroke-dasharray="143 96" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
+          <!-- WhatsApp: 26% = 93.6deg, offset by 143 -->
+          <circle cx="50" cy="50" r="38" fill="none" stroke="#10b981" stroke-width="14"
+            stroke-dasharray="61.8 177.2" stroke-dashoffset="-143" transform="rotate(-90 50 50)"/>
+          <!-- Voice: 14% = 50.4deg -->
+          <circle cx="50" cy="50" r="38" fill="none" stroke="#f59e0b" stroke-width="14"
+            stroke-dasharray="33.2 205.8" stroke-dashoffset="-204.8" transform="rotate(-90 50 50)"/>
+        </svg>
+        <!-- Legend -->
+        <div class="space-y-3 flex-1">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></div>
+            <div class="flex-1">
+              <div class="text-xs font-medium">AI Processing</div>
+              <div class="mono text-xs text-muted">$2,890 &mdash; 60%</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></div>
+            <div class="flex-1">
+              <div class="text-xs font-medium">WhatsApp</div>
+              <div class="mono text-xs text-muted">$1,245 &mdash; 26%</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></div>
+            <div class="flex-1">
+              <div class="text-xs font-medium">Voice</div>
+              <div class="mono text-xs text-muted">$697 &mdash; 14%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="bg-card rounded-2xl p-6 card-glow transition-all duration-200">
+    <p class="text-xs font-medium text-muted uppercase tracking-widest mb-6">Recent Activity</p>
+    <div class="space-y-0">
+      <div class="flex items-start gap-4 py-3 table-sep">
+        <div class="w-7 h-7 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="#10b981"><circle cx="6" cy="6" r="3"/></svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm">New lead <span class="font-medium">Budi Santoso</span> converted via WhatsApp</p>
+          <p class="text-xs text-muted mt-0.5">Org: PT Maju Bersama &mdash; Score 92</p>
+        </div>
+        <span class="text-xs text-muted mono whitespace-nowrap">2m ago</span>
+      </div>
+      <div class="flex items-start gap-4 py-3 table-sep">
+        <div class="w-7 h-7 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="#3b82f6"><path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9 2.5 10.5l.5-3.5L.5 4.5 4 4z"/></svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm">AI campaign <span class="font-medium">Ramadan Promo</span> completed — 1,240 messages sent</p>
+          <p class="text-xs text-muted mt-0.5">Cost: $48.20 &mdash; 18.4% open rate</p>
+        </div>
+        <span class="text-xs text-muted mono whitespace-nowrap">14m ago</span>
+      </div>
+      <div class="flex items-start gap-4 py-3 table-sep">
+        <div class="w-7 h-7 rounded-full bg-amber-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="#f59e0b"><path d="M6 1v10M1 6h10" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm">New org <span class="font-medium">CV Karya Mandiri</span> onboarded</p>
+          <p class="text-xs text-muted mt-0.5">Plan: Growth &mdash; 3 agents assigned</p>
+        </div>
+        <span class="text-xs text-muted mono whitespace-nowrap">1h ago</span>
+      </div>
+      <div class="flex items-start gap-4 py-3 table-sep">
+        <div class="w-7 h-7 rounded-full bg-violet-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="#8b5cf6"><rect x="1" y="5" width="10" height="6" rx="1"/><path d="M4 5V4a2 2 0 014 0v1" stroke="#8b5cf6" stroke-width="1.2" fill="none"/></svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm">Voice agent <span class="font-medium">Siti Rahayu</span> qualified in 3m 42s</p>
+          <p class="text-xs text-muted mt-0.5">Score updated: 74 → 88</p>
+        </div>
+        <span class="text-xs text-muted mono whitespace-nowrap">2h ago</span>
+      </div>
+      <div class="flex items-start gap-4 py-3">
+        <div class="w-7 h-7 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="#ef4444"><path d="M6 2v5M6 8.5v1" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm">Cost alert: <span class="font-medium">PT Teknologi Nusantara</span> nearing monthly limit</p>
+          <p class="text-xs text-muted mt-0.5">Usage: $480 / $500 limit (96%)</p>
+        </div>
+        <span class="text-xs text-muted mono whitespace-nowrap">3h ago</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LEADS VIEW ===== -->
+<div id="view-leads" class="view max-w-7xl mx-auto px-6 py-10">
+
+  <!-- Header -->
+  <div class="flex items-center gap-4 mb-8">
+    <h1 class="text-2xl font-semibold tracking-tight">Leads</h1>
+    <div class="flex-1 max-w-md">
+      <input type="text" placeholder="Search leads..." class="input-bg w-full px-4 py-2 rounded-xl text-sm outline-none focus:ring-1 focus:ring-white/10 transition-all" />
+    </div>
+    <div class="flex-1"></div>
+    <button class="btn-primary px-4 py-2 rounded-xl text-sm font-medium transition-all hover:opacity-90">
+      + New Lead
+    </button>
+  </div>
+
+  <!-- Sub-nav -->
+  <div class="flex items-center gap-6 mb-8 border-b divider pb-0">
+    <button onclick="switchSubview('table')" id="subnav-table"
+      class="pb-3 text-sm font-medium transition-all sub-nav-active" style="border-bottom: 1.5px solid currentColor;">Table</button>
+    <button onclick="switchSubview('board')" id="subnav-board"
+      class="pb-3 text-sm font-medium transition-all sub-nav-inactive">Board</button>
+    <button onclick="switchSubview('analytics')" id="subnav-analytics"
+      class="pb-3 text-sm font-medium transition-all sub-nav-inactive">Analytics</button>
+  </div>
+
+  <!-- Table Subview -->
+  <div id="subview-table" class="subview active">
+    <div class="bg-card rounded-2xl overflow-hidden">
+      <table class="w-full">
+        <thead>
+          <tr class="table-sep">
+            <th class="text-left py-3 px-5 text-xs font-medium text-muted uppercase tracking-wider">Name</th>
+            <th class="text-left py-3 px-5 text-xs font-medium text-muted uppercase tracking-wider">Contact</th>
+            <th class="text-left py-3 px-5 text-xs font-medium text-muted uppercase tracking-wider">Source</th>
+            <th class="text-left py-3 px-5 text-xs font-medium text-muted uppercase tracking-wider">Stage</th>
+            <th class="text-left py-3 px-5 text-xs font-medium text-muted uppercase tracking-wider">Score</th>
+            <th class="text-left py-3 px-5 text-xs font-medium text-muted uppercase tracking-wider">Assigned</th>
+            <th class="text-left py-3 px-5 text-xs font-medium text-muted uppercase tracking-wider">Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="hover-row trow transition-colors cursor-pointer">
+            <td class="py-3.5 px-5 table-sep"><span class="text-sm font-medium">Budi Santoso</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs text-muted mono">+62 812-3456-7890</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400">WhatsApp</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">Converted</span></td>
+            <td class="py-3.5 px-5 table-sep"><RingScore score="92"/></td>
+            <td class="py-3.5 px-5 table-sep text-sm text-secondary">Andi W.</td>
+            <td class="py-3.5 px-5 table-sep text-xs text-muted mono">2m ago</td>
+          </tr>
+          <tr class="hover-row trow transition-colors cursor-pointer">
+            <td class="py-3.5 px-5 table-sep"><span class="text-sm font-medium">Siti Rahayu</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs text-muted mono">+62 857-9012-3456</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400">Voice</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400">Qualified</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="mono text-sm font-medium text-emerald-400">88</span></td>
+            <td class="py-3.5 px-5 table-sep text-sm text-secondary">Dewi A.</td>
+            <td class="py-3.5 px-5 table-sep text-xs text-muted mono">2h ago</td>
+          </tr>
+          <tr class="hover-row trow transition-colors cursor-pointer">
+            <td class="py-3.5 px-5 table-sep"><span class="text-sm font-medium">Agus Purnomo</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs text-muted mono">+62 878-5678-9012</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400">Campaign</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400">Proposal</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="mono text-sm font-medium text-amber-400">74</span></td>
+            <td class="py-3.5 px-5 table-sep text-sm text-secondary">Andi W.</td>
+            <td class="py-3.5 px-5 table-sep text-xs text-muted mono">5h ago</td>
+          </tr>
+          <tr class="hover-row trow transition-colors cursor-pointer">
+            <td class="py-3.5 px-5 table-sep"><span class="text-sm font-medium">Dewi Kusuma</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs text-muted mono">+62 821-2345-6789</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400">WhatsApp</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400">Negotiation</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="mono text-sm font-medium text-blue-400">81</span></td>
+            <td class="py-3.5 px-5 table-sep text-sm text-secondary">Rini S.</td>
+            <td class="py-3.5 px-5 table-sep text-xs text-muted mono">Yesterday</td>
+          </tr>
+          <tr class="hover-row trow transition-colors cursor-pointer">
+            <td class="py-3.5 px-5 table-sep"><span class="text-sm font-medium">Hendra Wijaya</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs text-muted mono">+62 838-3456-7890</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400">Voice</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-gray-500/10 text-gray-400">New</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="mono text-sm font-medium text-muted">62</span></td>
+            <td class="py-3.5 px-5 table-sep text-sm text-secondary">Dewi A.</td>
+            <td class="py-3.5 px-5 table-sep text-xs text-muted mono">Yesterday</td>
+          </tr>
+          <tr class="hover-row trow transition-colors cursor-pointer">
+            <td class="py-3.5 px-5 table-sep"><span class="text-sm font-medium">Rina Marlina</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs text-muted mono">+62 813-9876-5432</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">Manual</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400">Qualified</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="mono text-sm font-medium text-emerald-400">87</span></td>
+            <td class="py-3.5 px-5 table-sep text-sm text-secondary">Rini S.</td>
+            <td class="py-3.5 px-5 table-sep text-xs text-muted mono">2d ago</td>
+          </tr>
+          <tr class="hover-row trow transition-colors cursor-pointer">
+            <td class="py-3.5 px-5 table-sep"><span class="text-sm font-medium">Fajar Nugroho</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs text-muted mono">+62 856-7890-1234</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400">Campaign</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400">Proposal</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="mono text-sm font-medium text-amber-400">71</span></td>
+            <td class="py-3.5 px-5 table-sep text-sm text-secondary">Andi W.</td>
+            <td class="py-3.5 px-5 table-sep text-xs text-muted mono">2d ago</td>
+          </tr>
+          <tr class="hover-row trow transition-colors cursor-pointer">
+            <td class="py-3.5 px-5 table-sep"><span class="text-sm font-medium">Lestari Putri</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs text-muted mono">+62 852-1234-5678</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400">WhatsApp</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">Converted</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="mono text-sm font-medium text-emerald-400">95</span></td>
+            <td class="py-3.5 px-5 table-sep text-sm text-secondary">Dewi A.</td>
+            <td class="py-3.5 px-5 table-sep text-xs text-muted mono">3d ago</td>
+          </tr>
+          <tr class="hover-row trow transition-colors cursor-pointer">
+            <td class="py-3.5 px-5 table-sep"><span class="text-sm font-medium">Rahmat Hidayat</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs text-muted mono">+62 819-5432-1098</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400">Voice</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="text-xs px-2 py-0.5 rounded-full bg-gray-500/10 text-gray-400">New</span></td>
+            <td class="py-3.5 px-5 table-sep"><span class="mono text-sm font-medium text-muted">55</span></td>
+            <td class="py-3.5 px-5 table-sep text-sm text-secondary">Rini S.</td>
+            <td class="py-3.5 px-5 table-sep text-xs text-muted mono">3d ago</td>
+          </tr>
+          <tr class="hover-row trow transition-colors cursor-pointer">
+            <td class="py-3.5 px-5"><span class="text-sm font-medium">Novia Anggraini</span></td>
+            <td class="py-3.5 px-5"><span class="text-xs text-muted mono">+62 877-6789-0123</span></td>
+            <td class="py-3.5 px-5"><span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">Manual</span></td>
+            <td class="py-3.5 px-5"><span class="text-xs px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400">Negotiation</span></td>
+            <td class="py-3.5 px-5"><span class="mono text-sm font-medium text-blue-400">79</span></td>
+            <td class="py-3.5 px-5 text-sm text-secondary">Andi W.</td>
+            <td class="py-3.5 px-5 text-xs text-muted mono">4d ago</td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- Pagination -->
+      <div class="flex items-center justify-between px-5 py-3 border-t divider">
+        <span class="text-xs text-muted">Showing 1–10 of 1,247</span>
+        <div class="flex items-center gap-3">
+          <button class="text-xs text-muted hover:text-current transition-colors">← Previous</button>
+          <span class="text-xs text-muted mono">1 / 125</span>
+          <button class="text-xs font-medium transition-colors">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Board Subview -->
+  <div id="subview-board" class="subview">
+    <div class="overflow-x-auto pb-4">
+      <div class="flex gap-4 min-w-max">
+        <!-- New -->
+        <div class="w-52 flex-shrink-0">
+          <div class="flex items-center justify-between mb-3 px-1">
+            <span class="text-xs font-medium text-muted uppercase tracking-wider">New</span>
+            <span class="text-xs mono text-muted">312</span>
+          </div>
+          <div class="space-y-2">
+            <div class="bg-card rounded-xl p-3.5 kanban-card cursor-pointer transition-all duration-150 card-glow">
+              <p class="text-sm font-medium mb-1">Hendra Wijaya</p>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-1.5 py-0.5 rounded-full bg-violet-500/10 text-violet-400">Voice</span>
+                <span class="mono text-xs text-muted ml-auto">62</span>
+              </div>
+            </div>
+            <div class="bg-card rounded-xl p-3.5 kanban-card cursor-pointer transition-all duration-150 card-glow">
+              <p class="text-sm font-medium mb-1">Rahmat Hidayat</p>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-1.5 py-0.5 rounded-full bg-violet-500/10 text-violet-400">Voice</span>
+                <span class="mono text-xs text-muted ml-auto">55</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Contacted -->
+        <div class="w-52 flex-shrink-0">
+          <div class="flex items-center justify-between mb-3 px-1">
+            <span class="text-xs font-medium text-muted uppercase tracking-wider">Contacted</span>
+            <span class="text-xs mono text-muted">198</span>
+          </div>
+          <div class="space-y-2">
+            <div class="bg-card rounded-xl p-3.5 kanban-card cursor-pointer transition-all duration-150 card-glow">
+              <p class="text-sm font-medium mb-1">Yoga Pratama</p>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400">WhatsApp</span>
+                <span class="mono text-xs text-muted ml-auto">68</span>
+              </div>
+            </div>
+            <div class="bg-card rounded-xl p-3.5 kanban-card cursor-pointer transition-all duration-150 card-glow">
+              <p class="text-sm font-medium mb-1">Sri Wahyuni</p>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400">Campaign</span>
+                <span class="mono text-xs text-muted ml-auto">61</span>
+              </div>
+            </div>
+            <div class="bg-card rounded-xl p-3.5 kanban-card cursor-pointer transition-all duration-150 card-glow">
+              <p class="text-sm font-medium mb-1">Bambang S.</p>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400">WhatsApp</span>
+                <span class="mono text-xs text-muted ml-auto">70</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Qualified -->
+        <div class="w-52 flex-shrink-0">
+          <div class="flex items-center justify-between mb-3 px-1">
+            <span class="text-xs font-medium text-muted uppercase tracking-wider">Qualified</span>
+            <span class="text-xs mono text-muted">247</span>
+          </div>
+          <div class="space-y-2">
+            <div class="bg-card rounded-xl p-3.5 kanban-card cursor-pointer transition-all duration-150 card-glow">
+              <p class="text-sm font-medium mb-1">Siti Rahayu</p>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-1.5 py-0.5 rounded-full bg-violet-500/10 text-violet-400">Voice</span>
+                <span class="mono text-xs text-emerald-400 ml-auto font-medium">88</span>
+              </div>
+            </div>
+            <div class="bg-card rounded-xl p-3.5 kanban-card cursor-pointer transition-all duration-150 card-glow">
+              <p class="text-sm font-medium mb-1">Rina Marlina</p>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">Manual</span>
+                <span class="mono text-xs text-emerald-400 ml-auto font-medium">87</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Proposal -->
+        <div class="w-52 flex-shrink-0">
+          <div class="flex items-center justify-between mb-3 px-1">
+            <span class="text-xs font-medium text-muted uppercase tracking-wider">Proposal</span>
+            <span class="text-xs mono text-muted">183</span>
+          </div>
+          <div class="space-y-2">
+            <div class="bg-card rounded-xl p-3.5 kanban-card cursor-pointer transition-all duration-150 card-glow">
+              <p class="text-sm font-medium mb-1">Agus Purnomo</p>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400">Campaign</span>
+                <span class="mono text-xs text-amber-400 ml-auto font-medium">74</span>
+              </div>
+            </div>
+            <div class="bg-card rounded-xl p-3.5 kanban-card cursor-pointer transition-all duration-150 card-glow">
+              <p class="text-sm font-medium mb-1">Fajar Nugroho</p>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400">Campaign</span>
+                <span class="mono text-xs text-amber-400 ml-auto font-medium">71</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Negotiation -->
+        <div class="w-52 flex-shrink-0">
+          <div class="flex items-center justify-between mb-3 px-1">
+            <span class="text-xs font-medium text-muted uppercase tracking-wider">Negotiation</span>
+            <span class="text-xs mono text-muted">62</span>
+          </div>
+          <div class="space-y-2">
+            <div class="bg-card rounded-xl p-3.5 kanban-card cursor-pointer transition-all duration-150 card-glow">
+              <p class="text-sm font-medium mb-1">Dewi Kusuma</p>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400">WhatsApp</span>
+                <span class="mono text-xs text-blue-400 ml-auto font-medium">81</span>
+              </div>
+            </div>
+            <div class="bg-card rounded-xl p-3.5 kanban-card cursor-pointer transition-all duration-150 card-glow">
+              <p class="text-sm font-medium mb-1">Novia Anggraini</p>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">Manual</span>
+                <span class="mono text-xs text-blue-400 ml-auto font-medium">79</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Converted -->
+        <div class="w-52 flex-shrink-0">
+          <div class="flex items-center justify-between mb-3 px-1">
+            <span class="text-xs font-medium text-emerald-400 uppercase tracking-wider">Converted</span>
+            <span class="text-xs mono text-emerald-400">155</span>
+          </div>
+          <div class="space-y-2">
+            <div class="bg-card rounded-xl p-3.5 border border-emerald-500/20 kanban-card cursor-pointer transition-all duration-150">
+              <p class="text-sm font-medium mb-1">Budi Santoso</p>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400">WhatsApp</span>
+                <span class="mono text-xs text-emerald-400 ml-auto font-medium">92</span>
+              </div>
+            </div>
+            <div class="bg-card rounded-xl p-3.5 border border-emerald-500/20 kanban-card cursor-pointer transition-all duration-150">
+              <p class="text-sm font-medium mb-1">Lestari Putri</p>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400">WhatsApp</span>
+                <span class="mono text-xs text-emerald-400 ml-auto font-medium">95</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics Subview -->
+  <div id="subview-analytics" class="subview">
+    <!-- Funnel -->
+    <div class="bg-card rounded-2xl p-8 mb-4">
+      <p class="text-xs font-medium text-muted uppercase tracking-widest mb-8">Conversion Funnel</p>
+      <div class="space-y-2 max-w-xl mx-auto">
+        <div class="relative">
+          <div class="flex items-center gap-4">
+            <span class="text-xs text-muted w-24 text-right">New</span>
+            <div class="flex-1 h-10 rounded-lg bg-blue-500/20 flex items-center px-4" style="clip-path: polygon(0 0, 100% 0, 96% 100%, 4% 100%);">
+              <span class="text-sm font-medium text-blue-400">1,247</span>
+              <span class="text-xs text-muted ml-auto">100%</span>
+            </div>
+          </div>
+        </div>
+        <div class="relative">
+          <div class="flex items-center gap-4">
+            <span class="text-xs text-muted w-24 text-right">Contacted</span>
+            <div class="flex-1 h-10 rounded-lg bg-violet-500/20 flex items-center px-4 mx-3" style="clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);">
+              <span class="text-sm font-medium text-violet-400">892</span>
+              <span class="text-xs text-muted ml-auto">71.5%</span>
+            </div>
+          </div>
+        </div>
+        <div class="relative">
+          <div class="flex items-center gap-4">
+            <span class="text-xs text-muted w-24 text-right">Qualified</span>
+            <div class="flex-1 h-10 rounded-lg bg-amber-500/20 flex items-center px-4 mx-6" style="clip-path: polygon(0 0, 100% 0, 94% 100%, 6% 100%);">
+              <span class="text-sm font-medium text-amber-400">534</span>
+              <span class="text-xs text-muted ml-auto">42.8%</span>
+            </div>
+          </div>
+        </div>
+        <div class="relative">
+          <div class="flex items-center gap-4">
+            <span class="text-xs text-muted w-24 text-right">Proposal</span>
+            <div class="flex-1 h-10 rounded-lg bg-orange-500/20 flex items-center px-4 mx-10" style="clip-path: polygon(0 0, 100% 0, 93% 100%, 7% 100%);">
+              <span class="text-sm font-medium text-orange-400">312</span>
+              <span class="text-xs text-muted ml-auto">25.0%</span>
+            </div>
+          </div>
+        </div>
+        <div class="relative">
+          <div class="flex items-center gap-4">
+            <span class="text-xs text-muted w-24 text-right">Converted</span>
+            <div class="flex-1 h-10 rounded-lg bg-emerald-500/20 flex items-center px-4 mx-16">
+              <span class="text-sm font-medium text-emerald-400">155</span>
+              <span class="text-xs text-muted ml-auto">12.4%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 stat cards -->
+    <div class="grid grid-cols-2 gap-4">
+      <div class="bg-card rounded-2xl p-6 card-glow">
+        <p class="text-xs text-muted uppercase tracking-widest mb-2">Avg Time to Convert</p>
+        <p class="mono text-4xl font-bold tracking-tighter">4.2 <span class="text-xl font-normal text-muted">days</span></p>
+      </div>
+      <div class="bg-card rounded-2xl p-6 card-glow">
+        <p class="text-xs text-muted uppercase tracking-widest mb-2">Top Source</p>
+        <p class="text-4xl font-bold tracking-tight">WhatsApp</p>
+        <p class="text-xs text-muted mt-1">45% of all conversions</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== COSTS VIEW ===== -->
+<div id="view-costs" class="view max-w-7xl mx-auto px-6 py-10">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-10">
+    <div>
+      <h1 class="text-2xl font-semibold tracking-tight mb-1">Usage &amp; Costs</h1>
+      <p class="text-muted text-sm">All organizations &mdash; aggregated</p>
+    </div>
+    <!-- Period selector -->
+    <div class="flex items-center gap-1 bg-card rounded-xl p-1">
+      <button onclick="setPeriod('7D', this)" class="period-active px-3 py-1.5 rounded-lg text-xs font-medium transition-all">7D</button>
+      <button onclick="setPeriod('30D', this)" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all text-muted hover:text-current">30D</button>
+      <button onclick="setPeriod('90D', this)" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all text-muted hover:text-current">90D</button>
+      <button onclick="setPeriod('12M', this)" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all text-muted hover:text-current">12M</button>
+    </div>
+  </div>
+
+  <!-- 3 hero stats -->
+  <div class="grid grid-cols-3 gap-4 mb-8">
+    <div class="bg-card rounded-2xl p-6 card-glow">
+      <p class="text-xs text-muted uppercase tracking-widest mb-3">Total Spend</p>
+      <p class="mono text-4xl font-bold tracking-tighter mb-4">$4,832</p>
+      <svg class="sparkline" width="100%" height="32" viewBox="0 0 160 32" preserveAspectRatio="none">
+        <defs><linearGradient id="gc1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/></linearGradient></defs>
+        <path class="sparkline-area" d="M0,25 C26,22 53,18 80,14 C106,10 133,8 160,5 L160,32 L0,32Z" fill="url(#gc1)"/>
+        <path d="M0,25 C26,22 53,18 80,14 C106,10 133,8 160,5" stroke="#3b82f6"/>
+      </svg>
+    </div>
+    <div class="bg-card rounded-2xl p-6 card-glow">
+      <p class="text-xs text-muted uppercase tracking-widest mb-3">Avg Daily</p>
+      <p class="mono text-4xl font-bold tracking-tighter mb-4">$161</p>
+      <svg class="sparkline" width="100%" height="32" viewBox="0 0 160 32" preserveAspectRatio="none">
+        <defs><linearGradient id="gc2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#10b981" stop-opacity="0"/></linearGradient></defs>
+        <path class="sparkline-area" d="M0,20 C26,18 53,22 80,16 C106,12 133,14 160,10 L160,32 L0,32Z" fill="url(#gc2)"/>
+        <path d="M0,20 C26,18 53,22 80,16 C106,12 133,14 160,10" stroke="#10b981"/>
+      </svg>
+    </div>
+    <div class="bg-card rounded-2xl p-6 card-glow">
+      <p class="text-xs text-muted uppercase tracking-widest mb-3">Projected Monthly</p>
+      <p class="mono text-4xl font-bold tracking-tighter mb-4">$4,980</p>
+      <svg class="sparkline" width="100%" height="32" viewBox="0 0 160 32" preserveAspectRatio="none">
+        <defs><linearGradient id="gc3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/></linearGradient></defs>
+        <path class="sparkline-area" d="M0,26 C26,22 53,20 80,16 C106,12 133,9 160,6 L160,32 L0,32Z" fill="url(#gc3)"/>
+        <path d="M0,26 C26,22 53,20 80,16 C106,12 133,9 160,6" stroke="#8b5cf6"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Main Area Chart -->
+  <div class="bg-card rounded-2xl p-6 mb-8">
+    <div class="flex items-center justify-between mb-6">
+      <p class="text-xs font-medium text-muted uppercase tracking-widest">Cost Over Time</p>
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-blue-500"></div><span class="text-xs text-muted">AI</span></div>
+        <div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-emerald-500"></div><span class="text-xs text-muted">WhatsApp</span></div>
+        <div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-amber-500"></div><span class="text-xs text-muted">Voice</span></div>
+      </div>
+    </div>
+    <svg width="100%" height="200" viewBox="0 0 800 200" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="gaAI" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="gaWA" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#10b981" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="gaVoice" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <!-- Gridlines -->
+      <line x1="0" y1="50" x2="800" y2="50" stroke="currentColor" stroke-opacity="0.04" stroke-width="1"/>
+      <line x1="0" y1="100" x2="800" y2="100" stroke="currentColor" stroke-opacity="0.04" stroke-width="1"/>
+      <line x1="0" y1="150" x2="800" y2="150" stroke="currentColor" stroke-opacity="0.04" stroke-width="1"/>
+      <!-- Voice area (bottom) -->
+      <path d="M0,170 C100,165 200,160 300,162 C400,164 500,158 600,155 C700,152 750,150 800,148 L800,200 L0,200Z" fill="url(#gaVoice)"/>
+      <path d="M0,170 C100,165 200,160 300,162 C400,164 500,158 600,155 C700,152 750,150 800,148" stroke="#f59e0b" stroke-width="1.5" fill="none"/>
+      <!-- WhatsApp area (mid) -->
+      <path d="M0,140 C100,132 200,125 300,128 C400,131 500,120 600,115 C700,110 750,106 800,102 L800,148 C750,150 700,152 600,155 C500,158 400,164 300,162 C200,160 100,165 0,170Z" fill="url(#gaWA)"/>
+      <path d="M0,140 C100,132 200,125 300,128 C400,131 500,120 600,115 C700,110 750,106 800,102" stroke="#10b981" stroke-width="1.5" fill="none"/>
+      <!-- AI area (top) -->
+      <path d="M0,90 C100,80 200,68 300,72 C400,76 500,60 600,52 C700,44 750,38 800,32 L800,102 C750,106 700,110 600,115 C500,120 400,131 300,128 C200,125 100,132 0,140Z" fill="url(#gaAI)"/>
+      <path d="M0,90 C100,80 200,68 300,72 C400,76 500,60 600,52 C700,44 750,38 800,32" stroke="#3b82f6" stroke-width="1.5" fill="none"/>
+      <!-- X labels -->
+      <text x="0" y="196" fill="currentColor" fill-opacity="0.3" font-size="9" font-family="monospace">Mar 11</text>
+      <text x="110" y="196" fill="currentColor" fill-opacity="0.3" font-size="9" font-family="monospace">Mar 12</text>
+      <text x="225" y="196" fill="currentColor" fill-opacity="0.3" font-size="9" font-family="monospace">Mar 13</text>
+      <text x="340" y="196" fill="currentColor" fill-opacity="0.3" font-size="9" font-family="monospace">Mar 14</text>
+      <text x="450" y="196" fill="currentColor" fill-opacity="0.3" font-size="9" font-family="monospace">Mar 15</text>
+      <text x="560" y="196" fill="currentColor" fill-opacity="0.3" font-size="9" font-family="monospace">Mar 16</text>
+      <text x="670" y="196" fill="currentColor" fill-opacity="0.3" font-size="9" font-family="monospace">Mar 17</text>
+    </svg>
+  </div>
+
+  <!-- 3 service cards -->
+  <div class="grid grid-cols-3 gap-4 mb-8">
+    <div class="bg-card rounded-2xl p-5 card-glow">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-6 h-6 rounded-md bg-emerald-500/10 flex items-center justify-center">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="#10b981"><path d="M10 2H2a1 1 0 00-1 1v5a1 1 0 001 1h8a1 1 0 001-1V3a1 1 0 00-1-1zM4 9v1M8 9v1"/></svg>
+        </div>
+        <span class="text-sm font-medium">WhatsApp</span>
+      </div>
+      <p class="mono text-2xl font-bold mb-1">$1,245</p>
+      <p class="text-xs text-muted mb-4">1,842 messages sent</p>
+      <div class="h-1.5 rounded-full bg-white/5">
+        <div class="h-1.5 rounded-full bg-emerald-500" style="width:26%"></div>
+      </div>
+      <p class="text-xs text-muted mt-1.5 mono">26% of total</p>
+    </div>
+    <div class="bg-card rounded-2xl p-5 card-glow">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-6 h-6 rounded-md bg-blue-500/10 flex items-center justify-center">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="#3b82f6"><path d="M6 1C3.2 1 1 3.2 1 6s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 2a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 6.5c-1.38 0-2.6-.7-3.32-1.76.6-.9 1.86-1.24 3.32-1.24s2.72.34 3.32 1.24C9.6 8.8 8.38 9.5 7 9.5z"/></svg>
+        </div>
+        <span class="text-sm font-medium">AI Processing</span>
+      </div>
+      <p class="mono text-2xl font-bold mb-1">$2,890</p>
+      <p class="text-xs text-muted mb-4">4.2M tokens consumed</p>
+      <div class="h-1.5 rounded-full bg-white/5">
+        <div class="h-1.5 rounded-full bg-blue-500" style="width:60%"></div>
+      </div>
+      <p class="text-xs text-muted mt-1.5 mono">60% of total</p>
+    </div>
+    <div class="bg-card rounded-2xl p-5 card-glow">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-6 h-6 rounded-md bg-amber-500/10 flex items-center justify-center">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="#f59e0b"><path d="M6 1a3 3 0 013 3c0 1.5-.9 2.8-2.2 3.4L7 11H5l.2-3.6A3 3 0 016 1z"/></svg>
+        </div>
+        <span class="text-sm font-medium">Voice</span>
+      </div>
+      <p class="mono text-2xl font-bold mb-1">$697</p>
+      <p class="text-xs text-muted mb-4">234 minutes processed</p>
+      <div class="h-1.5 rounded-full bg-white/5">
+        <div class="h-1.5 rounded-full bg-amber-500" style="width:14%"></div>
+      </div>
+      <p class="text-xs text-muted mt-1.5 mono">14% of total</p>
+    </div>
+  </div>
+
+  <!-- Per-org table -->
+  <div class="bg-card rounded-2xl overflow-hidden">
+    <div class="px-5 py-4 border-b divider">
+      <p class="text-xs font-medium text-muted uppercase tracking-widest">Per Organization</p>
+    </div>
+    <table class="w-full">
+      <thead>
+        <tr class="table-sep">
+          <th class="text-left py-3 px-5 text-xs font-medium text-muted">Organization</th>
+          <th class="text-left py-3 px-5 text-xs font-medium text-muted">WhatsApp</th>
+          <th class="text-left py-3 px-5 text-xs font-medium text-muted">AI</th>
+          <th class="text-left py-3 px-5 text-xs font-medium text-muted">Voice</th>
+          <th class="text-left py-3 px-5 text-xs font-medium text-muted">Total</th>
+          <th class="text-left py-3 px-5 text-xs font-medium text-muted">Limit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="hover-row trow transition-colors table-sep">
+          <td class="py-3.5 px-5 text-sm font-medium">PT Maju Bersama</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$342</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$820</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$180</td>
+          <td class="py-3.5 px-5 mono text-sm font-medium">$1,342</td>
+          <td class="py-3.5 px-5"><div class="h-1 rounded-full bg-white/5 w-24"><div class="h-1 rounded-full bg-blue-500" style="width:54%"></div></div></td>
+        </tr>
+        <tr class="hover-row trow transition-colors table-sep">
+          <td class="py-3.5 px-5 text-sm font-medium">CV Karya Mandiri</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$218</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$640</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$142</td>
+          <td class="py-3.5 px-5 mono text-sm font-medium">$1,000</td>
+          <td class="py-3.5 px-5"><div class="h-1 rounded-full bg-white/5 w-24"><div class="h-1 rounded-full bg-emerald-500" style="width:40%"></div></div></td>
+        </tr>
+        <tr class="hover-row trow transition-colors table-sep">
+          <td class="py-3.5 px-5 text-sm font-medium">PT Teknologi Nusantara</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$185</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$248</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$47</td>
+          <td class="py-3.5 px-5 mono text-sm font-medium text-red-400">$480</td>
+          <td class="py-3.5 px-5"><div class="h-1 rounded-full bg-white/5 w-24"><div class="h-1 rounded-full bg-red-500" style="width:96%"></div></div></td>
+        </tr>
+        <tr class="hover-row trow transition-colors table-sep">
+          <td class="py-3.5 px-5 text-sm font-medium">UD Sejahtera Abadi</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$290</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$680</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$190</td>
+          <td class="py-3.5 px-5 mono text-sm font-medium">$1,160</td>
+          <td class="py-3.5 px-5"><div class="h-1 rounded-full bg-white/5 w-24"><div class="h-1 rounded-full bg-violet-500" style="width:58%"></div></div></td>
+        </tr>
+        <tr class="hover-row trow transition-colors table-sep">
+          <td class="py-3.5 px-5 text-sm font-medium">PT Berkah Jaya</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$128</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$312</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$72</td>
+          <td class="py-3.5 px-5 mono text-sm font-medium">$512</td>
+          <td class="py-3.5 px-5"><div class="h-1 rounded-full bg-white/5 w-24"><div class="h-1 rounded-full bg-amber-500" style="width:34%"></div></div></td>
+        </tr>
+        <tr class="hover-row trow transition-colors">
+          <td class="py-3.5 px-5 text-sm font-medium">Toko Mandiri Online</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$82</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$190</td>
+          <td class="py-3.5 px-5 mono text-xs text-muted">$66</td>
+          <td class="py-3.5 px-5 mono text-sm font-medium">$338</td>
+          <td class="py-3.5 px-5"><div class="h-1 rounded-full bg-white/5 w-24"><div class="h-1 rounded-full bg-blue-500" style="width:22%"></div></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Theme
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.classList.contains('dark');
+    html.classList.toggle('dark', !isDark);
+    html.classList.toggle('light', isDark);
+    document.getElementById('icon-dark').classList.toggle('hidden', !isDark);
+    document.getElementById('icon-light').classList.toggle('hidden', isDark);
+  }
+
+  // Main view switching
+  function switchView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => {
+      t.classList.remove('active-tab');
+      t.style.borderBottom = '';
+    });
+    const view = document.getElementById('view-' + name);
+    view.classList.add('active');
+    view.style.opacity = '0';
+    requestAnimationFrame(() => { view.style.opacity = '1'; view.style.transition = 'opacity 0.2s ease'; });
+    const tab = document.getElementById('tab-' + name);
+    tab.classList.add('active-tab');
+  }
+
+  // Leads subview switching
+  function switchSubview(name) {
+    document.querySelectorAll('.subview').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('[id^="subnav-"]').forEach(b => {
+      b.className = b.className.replace('sub-nav-active', 'sub-nav-inactive');
+      b.style.borderBottom = '';
+    });
+    document.getElementById('subview-' + name).classList.add('active');
+    const btn = document.getElementById('subnav-' + name);
+    btn.className = btn.className.replace('sub-nav-inactive', 'sub-nav-active');
+    btn.style.borderBottom = '1.5px solid currentColor';
+  }
+
+  // Period selector
+  function setPeriod(period, el) {
+    document.querySelectorAll('[onclick^="setPeriod"]').forEach(b => {
+      b.className = b.className.replace('period-active', '');
+      if (!b.className.includes('text-muted')) b.className += ' text-muted';
+    });
+    el.className = el.className.replace('text-muted', '').trim();
+    el.className += ' period-active';
+  }
+
+  // Init dark mode
+  document.documentElement.classList.add('dark');
+</script>
+</body>
+</html>
