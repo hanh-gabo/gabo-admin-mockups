@@ -1,625 +1,650 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Option B – Dense Data-Centric Admin (Retool/Stripe Light)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option B: Dense Data-Centric — Gabo Internal Admin Portal</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-* { font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 13px; }
-.mono { font-family: 'IBM Plex Mono', monospace; }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-.sub-tab-content { display: none; }
-.sub-tab-content.active { display: block; }
-.alt-row:nth-child(even) { background-color: #f8f9fa; }
+  * { font-family: 'IBM Plex Sans', sans-serif; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+  body { font-size: 13px; background: #f9fafb; }
+  table { border-collapse: collapse; width: 100%; }
+  th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  td, th { padding: 7px 10px; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .nav-tab { cursor: pointer; padding: 10px 16px; font-size: 13px; font-weight: 500; border-bottom: 2px solid transparent; color: #6b7280; }
+  .nav-tab:hover { color: #111827; }
+  .nav-tab.active { color: #4f46e5; border-bottom-color: #4f46e5; }
+  .sub-tab { cursor: pointer; padding: 5px 12px; font-size: 12px; font-weight: 500; border-radius: 4px; color: #6b7280; }
+  .sub-tab.active { background: #eef2ff; color: #4f46e5; }
+  .btn-primary { background: #4f46e5; color: white; padding: 6px 12px; border-radius: 5px; font-size: 12px; font-weight: 500; border: none; cursor: pointer; }
+  .btn-primary:hover { background: #4338ca; }
+  .btn-sm { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; border: 1px solid #d1d5db; background: white; cursor: pointer; color: #374151; }
+  .btn-sm:hover { background: #f3f4f6; }
+  .badge { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 9999px; font-size: 11px; font-weight: 500; }
+  .badge-free { background: #f3f4f6; color: #6b7280; }
+  .badge-starter { background: #eff6ff; color: #1d4ed8; }
+  .badge-pro { background: #eef2ff; color: #4338ca; }
+  .badge-enterprise { background: #faf5ff; color: #7e22ce; }
+  .badge-active { background: #f0fdf4; color: #15803d; }
+  .badge-trial { background: #fffbeb; color: #b45309; }
+  .badge-suspended { background: #fef2f2; color: #b91c1c; }
+  .badge-new { background: #f3f4f6; color: #6b7280; }
+  .badge-qualified { background: #eff6ff; color: #1d4ed8; }
+  .badge-contacted { background: #eef2ff; color: #4338ca; }
+  .badge-negotiation { background: #fffbeb; color: #b45309; }
+  .badge-converted { background: #f0fdf4; color: #15803d; }
+  .badge-lost { background: #fef2f2; color: #b91c1c; }
+  .badge-whatsapp { background: #f0fdf4; color: #15803d; }
+  .badge-voice { background: #faf5ff; color: #7e22ce; }
+  .badge-campaign { background: #eff6ff; color: #1d4ed8; }
+  .badge-manual { background: #f3f4f6; color: #6b7280; }
+  .badge-info { background: #eff6ff; color: #1d4ed8; }
+  .badge-warn { background: #fffbeb; color: #b45309; }
+  .badge-error { background: #fef2f2; color: #b91c1c; }
+  .score-low { color: #9ca3af; }
+  .score-mid { color: #d97706; }
+  .score-high { color: #16a34a; }
+  .highlight-row td { background: #fffbeb !important; }
+  .stat-card { background: white; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px 16px; }
+  .stat-card .label { font-size: 11px; color: #6b7280; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+  .stat-card .value { font-size: 22px; font-weight: 700; color: #111827; font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
+  .stat-card .delta { font-size: 11px; margin-top: 3px; }
+  .delta-up { color: #16a34a; }
+  .delta-down { color: #dc2626; }
+  .delta-neutral { color: #6b7280; }
+  .input-sm { border: 1px solid #d1d5db; border-radius: 5px; padding: 5px 10px; font-size: 12px; color: #374151; background: white; outline: none; }
+  .input-sm:focus { border-color: #6366f1; box-shadow: 0 0 0 2px #eef2ff; }
+  .health-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+  .dot-green { background: #22c55e; }
+  .dot-amber { background: #f59e0b; }
+  .dot-red { background: #ef4444; }
+  .kanban-col { min-width: 180px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px; }
+  .kanban-card { background: white; border: 1px solid #e5e7eb; border-radius: 5px; padding: 8px 10px; margin-bottom: 6px; font-size: 12px; }
+  .period-btn { padding: 4px 12px; font-size: 12px; font-weight: 500; border: 1px solid #d1d5db; background: white; cursor: pointer; color: #6b7280; }
+  .period-btn:first-child { border-radius: 5px 0 0 5px; }
+  .period-btn:last-child { border-radius: 0 5px 5px 0; }
+  .period-btn.active { background: #eef2ff; color: #4f46e5; border-color: #a5b4fc; }
+  .table-header { background: #f9fafb; }
+  .table-row:hover td { background: #f9fafb; }
+  .top-banner { background: #4f46e5; color: white; text-align: center; padding: 6px; font-size: 12px; font-weight: 500; letter-spacing: 0.03em; }
+  .impersonate-btn { background: #eef2ff; border: 1px solid #a5b4fc; color: #4f46e5; }
+  .impersonate-btn:hover { background: #e0e7ff; }
 </style>
 </head>
-<body class="bg-white text-gray-900">
+<body class="bg-gray-50">
 
-<!-- Banner -->
-<div class="bg-indigo-600 text-white text-center font-semibold py-1.5" style="font-size:12px">
-  OPTION B — Dense Data-Centric Admin (Retool/Stripe Light Theme) · Gabo Admin Tool Mockup
-</div>
+<!-- Top Banner -->
+<div class="top-banner">Option B: Dense Data-Centric &nbsp;|&nbsp; Retool/Stripe Aesthetic &nbsp;|&nbsp; Gabo Internal Admin Portal &nbsp;|&nbsp; Light Theme Only</div>
 
-<!-- Top Nav Bar (no sidebar) -->
-<header class="bg-white border-b border-gray-200" style="height:40px">
-  <div class="flex items-center h-full px-4 gap-0">
-    <!-- Logo -->
-    <div class="flex items-center gap-1.5 mr-6 flex-shrink-0">
-      <span class="font-semibold text-indigo-600" style="font-size:14px">gabo</span>
-      <span class="text-gray-400" style="font-size:11px">admin</span>
+<!-- Top Navigation -->
+<header class="bg-white border-b border-gray-200 sticky top-0 z-10">
+  <div class="flex items-center justify-between px-6" style="height:48px;">
+    <div class="flex items-center gap-0" style="height:48px;">
+      <span class="font-bold text-gray-900 mr-6" style="font-size:15px;">Gabo <span class="text-indigo-600">Admin</span></span>
+      <nav class="flex items-end" style="height:48px;">
+        <div class="nav-tab active" onclick="switchTab(event,'dashboard')">Dashboard</div>
+        <div class="nav-tab" onclick="switchTab(event,'customers')">Customers</div>
+        <div class="nav-tab" onclick="switchTab(event,'billing')">Usage &amp; Billing</div>
+        <div class="nav-tab" onclick="switchTab(event,'leads')">Leads</div>
+      </nav>
     </div>
-    <!-- Nav links -->
-    <button onclick="showTab('dashboard')" id="nav-dashboard" class="nav-link h-full px-3 border-b-2 border-indigo-600 text-indigo-700 font-medium" style="font-size:12px">Dashboard</button>
-    <button onclick="showTab('leads')" id="nav-leads" class="nav-link h-full px-3 border-b-2 border-transparent text-gray-600 hover:text-gray-900" style="font-size:12px">Leads</button>
-    <button onclick="showTab('costs')" id="nav-costs" class="nav-link h-full px-3 border-b-2 border-transparent text-gray-600 hover:text-gray-900" style="font-size:12px">Costs</button>
-    <div class="h-full border-l border-gray-200 mx-2"></div>
-    <a href="#" class="nav-link h-full px-3 flex items-center border-b-2 border-transparent text-gray-600 hover:text-gray-900" style="font-size:12px">Organizations</a>
-    <a href="#" class="nav-link h-full px-3 flex items-center border-b-2 border-transparent text-gray-600 hover:text-gray-900" style="font-size:12px">Settings</a>
-    <!-- Right side -->
-    <div class="ml-auto flex items-center gap-3">
-      <span class="text-gray-400" style="font-size:11px">Mar 17, 2026</span>
-      <button class="border border-gray-200 rounded px-2 py-1 text-gray-600 hover:bg-gray-50" style="font-size:11px">+ New Lead</button>
-      <button class="bg-indigo-600 text-white rounded px-2 py-1 hover:bg-indigo-700 font-medium" style="font-size:11px">Export CSV</button>
-      <div class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-semibold flex-shrink-0" style="font-size:10px">AD</div>
+    <div class="flex items-center gap-3">
+      <span class="text-xs text-gray-500 mono">Production</span>
+      <span class="badge badge-active">Live</span>
+      <div style="width:28px;height:28px;border-radius:50%;background:#4f46e5;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;">A</div>
     </div>
   </div>
 </header>
 
-<!-- Breadcrumb bar -->
-<div class="bg-white border-b border-gray-100 px-4 py-1 flex items-center gap-1" style="font-size:11px; color:#9ca3af">
-  <span>Gabo Admin</span>
-  <span>›</span>
-  <span id="breadcrumb-cur" class="text-gray-700 font-medium">Dashboard</span>
+<main class="px-6 py-5" style="max-width:1600px;margin:0 auto;">
+
+<!-- ==================== DASHBOARD ==================== -->
+<div id="tab-dashboard" class="tab-content active">
+
+  <!-- 6 Stat Cards -->
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px;">
+    <div class="stat-card">
+      <div class="label">Total Workspaces</div>
+      <div class="value">24</div>
+      <div class="delta delta-up">+2 this month</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Active Users (7d)</div>
+      <div class="value">156</div>
+      <div class="delta delta-up">+12% vs prev period</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Conversations (today)</div>
+      <div class="value">342</div>
+      <div class="delta delta-up">+8% vs yesterday</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">AI Resolution Rate</div>
+      <div class="value">78.5%</div>
+      <div class="delta delta-up">+3.2pp this week</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Monthly Cost</div>
+      <div class="value mono" style="font-size:20px;">$4,832</div>
+      <div class="delta delta-down">-2.1% vs last mo</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Avg Response Time</div>
+      <div class="value mono">1.2s</div>
+      <div class="delta delta-up">-15% vs last week</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:280px 1fr;gap:16px;margin-bottom:16px;">
+    <!-- System Health -->
+    <div class="bg-white border border-gray-200 rounded-md shadow-sm">
+      <div class="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
+        <span style="font-size:12px;font-weight:600;color:#111827;">System Health</span>
+        <span class="mono text-gray-400" style="font-size:10px;">checked 12s ago</span>
+      </div>
+      <div class="px-4 py-3" style="display:flex;flex-direction:column;gap:9px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="display:flex;align-items:center;color:#374151;"><span class="health-dot dot-green"></span>API Gateway</span>
+          <span class="mono text-gray-500" style="font-size:11px;">99.9% uptime</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="display:flex;align-items:center;color:#374151;"><span class="health-dot dot-green"></span>Webhooks</span>
+          <span class="mono text-gray-500" style="font-size:11px;">100% delivery</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="display:flex;align-items:center;color:#374151;"><span class="health-dot dot-amber"></span>Job Queue</span>
+          <span class="mono font-medium" style="font-size:11px;color:#d97706;">142 pending</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="display:flex;align-items:center;color:#374151;"><span class="health-dot dot-green"></span>WA Gateway</span>
+          <span class="mono text-gray-500" style="font-size:11px;">Operational</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="display:flex;align-items:center;color:#374151;"><span class="health-dot dot-green"></span>Error Rate</span>
+          <span class="mono text-gray-500" style="font-size:11px;">0.3% (7d avg)</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="display:flex;align-items:center;color:#374151;"><span class="health-dot dot-green"></span>Firestore</span>
+          <span class="mono text-gray-500" style="font-size:11px;">Healthy</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Orgs -->
+    <div class="bg-white border border-gray-200 rounded-md shadow-sm">
+      <div class="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
+        <span style="font-size:12px;font-weight:600;color:#111827;">Top Organizations (7d Activity)</span>
+        <button class="btn-sm">View All</button>
+      </div>
+      <table>
+        <thead>
+          <tr class="table-header">
+            <th class="text-left text-gray-500">Org Name</th>
+            <th class="text-left text-gray-500">Plan</th>
+            <th class="text-right text-gray-500">Members</th>
+            <th class="text-right text-gray-500">Convos (7d)</th>
+            <th class="text-right text-gray-500">MoM Trend</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr class="table-row"><td class="font-medium text-gray-900">Tokopedia CX</td><td><span class="badge badge-enterprise">Enterprise</span></td><td class="text-right mono text-gray-700">48</td><td class="text-right mono text-gray-700">2,341</td><td class="text-right mono delta-up">+18.4%</td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">GoTo Financial</td><td><span class="badge badge-enterprise">Enterprise</span></td><td class="text-right mono text-gray-700">35</td><td class="text-right mono text-gray-700">1,892</td><td class="text-right mono delta-up">+11.2%</td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Bukalapak Support</td><td><span class="badge badge-pro">Pro</span></td><td class="text-right mono text-gray-700">22</td><td class="text-right mono text-gray-700">1,204</td><td class="text-right mono delta-up">+7.8%</td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">PT Maju Bersama</td><td><span class="badge badge-pro">Pro</span></td><td class="text-right mono text-gray-700">14</td><td class="text-right mono text-gray-700">876</td><td class="text-right mono delta-down">-3.1%</td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">CV Teknologi Nusantara</td><td><span class="badge badge-starter">Starter</span></td><td class="text-right mono text-gray-700">9</td><td class="text-right mono text-gray-700">432</td><td class="text-right mono delta-up">+22.5%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="bg-white border border-gray-200 rounded-md shadow-sm">
+    <div class="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
+      <span style="font-size:12px;font-weight:600;color:#111827;">Recent Activity</span>
+      <button class="btn-sm">View Full Log</button>
+    </div>
+    <table>
+      <thead>
+        <tr class="table-header">
+          <th class="text-left text-gray-500" style="width:100px;">Time</th>
+          <th class="text-left text-gray-500" style="width:110px;">Type</th>
+          <th class="text-left text-gray-500">Description</th>
+          <th class="text-left text-gray-500" style="width:140px;">Actor</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr class="table-row"><td class="mono text-gray-500" style="font-size:11px;">10:42:18</td><td><span class="badge badge-info">Lead Created</span></td><td class="text-gray-700">New lead <strong>Budi Santoso</strong> added via WhatsApp intake form</td><td class="mono text-gray-500" style="font-size:11px;">system</td></tr>
+        <tr class="table-row"><td class="mono text-gray-500" style="font-size:11px;">10:38:05</td><td><span class="badge badge-warn">Cost Alert</span></td><td class="text-gray-700">PT Sinar Harapan reached 85% of monthly AI credit limit</td><td class="mono text-gray-500" style="font-size:11px;">billing-worker</td></tr>
+        <tr class="table-row"><td class="mono text-gray-500" style="font-size:11px;">10:31:44</td><td><span class="badge badge-info">User Login</span></td><td class="text-gray-700">Admin login from <strong>adi@tokopedia.com</strong> — IP 103.94.12.5</td><td class="mono text-gray-500" style="font-size:11px;">auth-service</td></tr>
+        <tr class="table-row"><td class="mono text-gray-500" style="font-size:11px;">10:19:22</td><td><span class="badge badge-info">Config Update</span></td><td class="text-gray-700">Workspace config updated for Bukalapak Support — response tone changed</td><td class="mono text-gray-500" style="font-size:11px;">rini.pratiwi</td></tr>
+        <tr class="table-row"><td class="mono text-gray-500" style="font-size:11px;">09:55:11</td><td><span class="badge badge-info">Stage Change</span></td><td class="text-gray-700">Lead <strong>Dewi Rahayu</strong> moved from Qualified → Negotiation by Andi W.</td><td class="mono text-gray-500" style="font-size:11px;">andi.w</td></tr>
+        <tr class="table-row"><td class="mono text-gray-500" style="font-size:11px;">09:43:08</td><td><span class="badge badge-error">Webhook Fail</span></td><td class="text-gray-700">Webhook delivery failed for CV Nusantara Maju — endpoint timeout (3x retry)</td><td class="mono text-gray-500" style="font-size:11px;">webhook-worker</td></tr>
+        <tr class="table-row"><td class="mono text-gray-500" style="font-size:11px;">09:12:33</td><td><span class="badge badge-active">Org Onboard</span></td><td class="text-gray-700">New workspace onboarded: <strong>PT Berkah Mandiri</strong> on Starter plan</td><td class="mono text-gray-500" style="font-size:11px;">system</td></tr>
+        <tr class="table-row"><td class="mono text-gray-500" style="font-size:11px;">08:59:47</td><td><span class="badge badge-info">Billing</span></td><td class="text-gray-700">Monthly billing cycle completed — 18 invoices generated, Rp 48.2M total</td><td class="mono text-gray-500" style="font-size:11px;">billing-worker</td></tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
-<!-- Page content -->
-<main class="bg-gray-50 min-h-screen p-3">
+<!-- ==================== CUSTOMERS ==================== -->
+<div id="tab-customers" class="tab-content">
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <h1 style="font-size:16px;font-weight:700;color:#111827;">Customers</h1>
+      <p class="text-gray-500" style="font-size:12px;margin-top:2px;">Manage workspace accounts, plans, and access (GAB-145)</p>
+    </div>
+    <button class="btn-primary">+ Create Account</button>
+  </div>
 
-  <!-- ===== DASHBOARD ===== -->
-  <div id="tab-content-dashboard" class="tab-content active">
+  <div class="flex items-center gap-2 mb-3">
+    <input class="input-sm" placeholder="Search company, contact, email..." style="width:260px;">
+    <select class="input-sm">
+      <option>All Plans</option>
+      <option>Free</option>
+      <option>Starter</option>
+      <option>Pro</option>
+      <option>Enterprise</option>
+    </select>
+    <select class="input-sm">
+      <option>All Status</option>
+      <option>Active</option>
+      <option>Trial</option>
+      <option>Suspended</option>
+    </select>
+    <select class="input-sm">
+      <option>All Integrations</option>
+      <option>WhatsApp Only</option>
+      <option>Voice Enabled</option>
+    </select>
+    <span class="text-gray-400 mono" style="font-size:11px;margin-left:4px;">24 results</span>
+  </div>
 
-    <!-- 6 stats in single compact row -->
-    <div class="grid grid-cols-6 gap-2 mb-3">
-      <div class="bg-white border border-gray-200 rounded p-2.5">
-        <div class="text-gray-500 mb-0.5" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em">Total Leads</div>
-        <div class="font-semibold text-gray-900 mono" style="font-size:18px">4,821</div>
-        <div class="text-green-600 mt-0.5 flex items-center gap-0.5" style="font-size:10px">▲ 12.4%</div>
-      </div>
-      <div class="bg-white border border-gray-200 rounded p-2.5">
-        <div class="text-gray-500 mb-0.5" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em">Active Orgs</div>
-        <div class="font-semibold text-gray-900 mono" style="font-size:18px">38</div>
-        <div class="text-green-600 mt-0.5" style="font-size:10px">▲ +3 orgs</div>
-      </div>
-      <div class="bg-white border border-gray-200 rounded p-2.5">
-        <div class="text-gray-500 mb-0.5" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em">Conversion</div>
-        <div class="font-semibold text-gray-900 mono" style="font-size:18px">18.7%</div>
-        <div class="text-red-500 mt-0.5" style="font-size:10px">▼ 2.1%</div>
-      </div>
-      <div class="bg-white border border-gray-200 rounded p-2.5">
-        <div class="text-gray-500 mb-0.5" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em">Monthly Cost</div>
-        <div class="font-semibold text-gray-900 mono" style="font-size:18px">8.24M</div>
-        <div class="text-green-600 mt-0.5" style="font-size:10px">▼ 5.3% saved</div>
-      </div>
-      <div class="bg-white border border-gray-200 rounded p-2.5">
-        <div class="text-gray-500 mb-0.5" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em">Avg Score</div>
-        <div class="font-semibold text-gray-900 mono" style="font-size:18px">72.4</div>
-        <div class="text-green-600 mt-0.5" style="font-size:10px">▲ +4.1 pts</div>
-      </div>
-      <div class="bg-white border border-gray-200 rounded p-2.5">
-        <div class="text-gray-500 mb-0.5" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em">WA Messages</div>
-        <div class="font-semibold text-gray-900 mono" style="font-size:18px">24.6K</div>
-        <div class="text-green-600 mt-0.5" style="font-size:10px">▲ 18.9%</div>
+  <div class="bg-white border border-gray-200 rounded-md shadow-sm">
+    <table>
+      <thead>
+        <tr class="table-header border-b border-gray-200">
+          <th class="text-left text-gray-500">Company Name</th>
+          <th class="text-left text-gray-500">Primary Contact</th>
+          <th class="text-left text-gray-500">Plan</th>
+          <th class="text-left text-gray-500">Status</th>
+          <th class="text-right text-gray-500">Members</th>
+          <th class="text-left text-gray-500">Integrations</th>
+          <th class="text-left text-gray-500">Last Active</th>
+          <th class="text-left text-gray-500" style="width:165px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr class="table-row"><td class="font-semibold text-gray-900">Tokopedia CX</td><td class="text-gray-600" style="font-size:12px;">adi@tokopedia.com</td><td><span class="badge badge-enterprise">Enterprise</span></td><td><span class="badge badge-active">Active</span></td><td class="text-right mono text-gray-700">48</td><td class="text-gray-500" style="font-size:11px;">WA, Voice</td><td class="mono text-gray-400" style="font-size:11px;">2 min ago</td><td><button class="btn-sm impersonate-btn">Impersonate</button> <button class="btn-sm">▾</button></td></tr>
+        <tr class="table-row"><td class="font-semibold text-gray-900">GoTo Financial</td><td class="text-gray-600" style="font-size:12px;">ops@goto.id</td><td><span class="badge badge-enterprise">Enterprise</span></td><td><span class="badge badge-active">Active</span></td><td class="text-right mono text-gray-700">35</td><td class="text-gray-500" style="font-size:11px;">WA, Voice</td><td class="mono text-gray-400" style="font-size:11px;">14 min ago</td><td><button class="btn-sm impersonate-btn">Impersonate</button> <button class="btn-sm">▾</button></td></tr>
+        <tr class="table-row"><td class="font-semibold text-gray-900">Bukalapak Support</td><td class="text-gray-600" style="font-size:12px;">tech@bukalapak.com</td><td><span class="badge badge-pro">Pro</span></td><td><span class="badge badge-active">Active</span></td><td class="text-right mono text-gray-700">22</td><td class="text-gray-500" style="font-size:11px;">WA</td><td class="mono text-gray-400" style="font-size:11px;">1 hr ago</td><td><button class="btn-sm impersonate-btn">Impersonate</button> <button class="btn-sm">▾</button></td></tr>
+        <tr class="table-row"><td class="font-semibold text-gray-900">PT Maju Bersama</td><td class="text-gray-600" style="font-size:12px;">budi@majubersama.co.id</td><td><span class="badge badge-pro">Pro</span></td><td><span class="badge badge-active">Active</span></td><td class="text-right mono text-gray-700">14</td><td class="text-gray-500" style="font-size:11px;">WA, Voice</td><td class="mono text-gray-400" style="font-size:11px;">3 hr ago</td><td><button class="btn-sm impersonate-btn">Impersonate</button> <button class="btn-sm">▾</button></td></tr>
+        <tr class="table-row"><td class="font-semibold text-gray-900">CV Teknologi Nusantara</td><td class="text-gray-600" style="font-size:12px;">info@teknus.id</td><td><span class="badge badge-starter">Starter</span></td><td><span class="badge badge-active">Active</span></td><td class="text-right mono text-gray-700">9</td><td class="text-gray-500" style="font-size:11px;">WA</td><td class="mono text-gray-400" style="font-size:11px;">5 hr ago</td><td><button class="btn-sm impersonate-btn">Impersonate</button> <button class="btn-sm">▾</button></td></tr>
+        <tr class="table-row"><td class="font-semibold text-gray-900">PT Sinar Harapan</td><td class="text-gray-600" style="font-size:12px;">admin@sinarharapan.id</td><td><span class="badge badge-pro">Pro</span></td><td><span class="badge badge-trial">Trial</span></td><td class="text-right mono text-gray-700">7</td><td class="text-gray-500" style="font-size:11px;">WA</td><td class="mono text-gray-400" style="font-size:11px;">6 hr ago</td><td><button class="btn-sm impersonate-btn">Impersonate</button> <button class="btn-sm">▾</button></td></tr>
+        <tr class="table-row"><td class="font-semibold text-gray-900">Kopi Kenangan HQ</td><td class="text-gray-600" style="font-size:12px;">ops@kopikenangan.com</td><td><span class="badge badge-starter">Starter</span></td><td><span class="badge badge-active">Active</span></td><td class="text-right mono text-gray-700">11</td><td class="text-gray-500" style="font-size:11px;">WA</td><td class="mono text-gray-400" style="font-size:11px;">Yesterday</td><td><button class="btn-sm impersonate-btn">Impersonate</button> <button class="btn-sm">▾</button></td></tr>
+        <tr class="table-row"><td class="font-semibold text-gray-900">PT Berkah Mandiri</td><td class="text-gray-600" style="font-size:12px;">hello@berkahmandiri.id</td><td><span class="badge badge-starter">Starter</span></td><td><span class="badge badge-trial">Trial</span></td><td class="text-right mono text-gray-700">4</td><td class="text-gray-500" style="font-size:11px;">WA</td><td class="mono text-gray-400" style="font-size:11px;">Yesterday</td><td><button class="btn-sm impersonate-btn">Impersonate</button> <button class="btn-sm">▾</button></td></tr>
+        <tr class="table-row"><td class="font-semibold text-gray-900">Grab ID Operations</td><td class="text-gray-600" style="font-size:12px;">eng@grab.com</td><td><span class="badge badge-enterprise">Enterprise</span></td><td><span class="badge badge-active">Active</span></td><td class="text-right mono text-gray-700">61</td><td class="text-gray-500" style="font-size:11px;">WA, Voice</td><td class="mono text-gray-400" style="font-size:11px;">3 days ago</td><td><button class="btn-sm impersonate-btn">Impersonate</button> <button class="btn-sm">▾</button></td></tr>
+        <tr class="table-row"><td class="font-semibold text-gray-900">Akulaku Indonesia</td><td class="text-gray-600" style="font-size:12px;">dev@akulaku.com</td><td><span class="badge badge-pro">Pro</span></td><td><span class="badge badge-active">Active</span></td><td class="text-right mono text-gray-700">18</td><td class="text-gray-500" style="font-size:11px;">WA</td><td class="mono text-gray-400" style="font-size:11px;">3 days ago</td><td><button class="btn-sm impersonate-btn">Impersonate</button> <button class="btn-sm">▾</button></td></tr>
+        <tr class="table-row"><td class="font-semibold text-gray-900">UD Jaya Sentosa</td><td class="text-gray-600" style="font-size:12px;">jaya@udjaya.co.id</td><td><span class="badge badge-free">Free</span></td><td><span class="badge badge-active">Active</span></td><td class="text-right mono text-gray-700">2</td><td class="text-gray-500" style="font-size:11px;">WA</td><td class="mono text-gray-400" style="font-size:11px;">4 days ago</td><td><button class="btn-sm impersonate-btn">Impersonate</button> <button class="btn-sm">▾</button></td></tr>
+        <tr class="table-row"><td class="font-semibold text-gray-900">PT Surya Abadi</td><td class="text-gray-600" style="font-size:12px;">cs@suryaabadi.id</td><td><span class="badge badge-starter">Starter</span></td><td><span class="badge badge-suspended">Suspended</span></td><td class="text-right mono text-gray-700">5</td><td class="text-gray-500" style="font-size:11px;">WA</td><td class="mono text-gray-400" style="font-size:11px;">8 days ago</td><td><button class="btn-sm impersonate-btn">Impersonate</button> <button class="btn-sm">▾</button></td></tr>
+        <tr class="table-row"><td class="font-semibold text-gray-900">CV Mitra Usaha</td><td class="text-gray-600" style="font-size:12px;">mitra@cvmitra.id</td><td><span class="badge badge-free">Free</span></td><td><span class="badge badge-trial">Trial</span></td><td class="text-right mono text-gray-700">3</td><td class="text-gray-500" style="font-size:11px;">—</td><td class="mono text-gray-400" style="font-size:11px;">9 days ago</td><td><button class="btn-sm impersonate-btn">Impersonate</button> <button class="btn-sm">▾</button></td></tr>
+        <tr class="table-row"><td class="font-semibold text-gray-900">Indofood CRM Team</td><td class="text-gray-600" style="font-size:12px;">tech@indofood.com</td><td><span class="badge badge-enterprise">Enterprise</span></td><td><span class="badge badge-active">Active</span></td><td class="text-right mono text-gray-700">29</td><td class="text-gray-500" style="font-size:11px;">WA, Voice</td><td class="mono text-gray-400" style="font-size:11px;">2 days ago</td><td><button class="btn-sm impersonate-btn">Impersonate</button> <button class="btn-sm">▾</button></td></tr>
+        <tr class="table-row"><td class="font-semibold text-gray-900">Traveloka CX</td><td class="text-gray-600" style="font-size:12px;">cx@traveloka.com</td><td><span class="badge badge-pro">Pro</span></td><td><span class="badge badge-active">Active</span></td><td class="text-right mono text-gray-700">16</td><td class="text-gray-500" style="font-size:11px;">WA</td><td class="mono text-gray-400" style="font-size:11px;">Today</td><td><button class="btn-sm impersonate-btn">Impersonate</button> <button class="btn-sm">▾</button></td></tr>
+      </tbody>
+    </table>
+    <div class="px-4 py-2 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+      <span class="mono text-gray-500" style="font-size:11px;">Showing 1–15 of 24 workspaces</span>
+      <div class="flex items-center gap-1">
+        <button class="btn-sm" disabled style="color:#d1d5db;border-color:#e5e7eb;">&#8592; Prev</button>
+        <button class="btn-sm" style="background:#eef2ff;border-color:#a5b4fc;color:#4f46e5;">1</button>
+        <button class="btn-sm">2</button>
+        <button class="btn-sm">Next &#8594;</button>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- System health + activity log side by side -->
-    <div class="grid grid-cols-3 gap-2 mb-3">
-
-      <!-- System health -->
-      <div class="bg-white border border-gray-200 rounded">
-        <div class="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
-          <span class="font-medium text-gray-800" style="font-size:12px">System Health</span>
-          <span class="text-green-600 font-medium" style="font-size:10px">● All systems normal</span>
-        </div>
-        <div class="p-2 space-y-1.5">
-          <div class="flex items-center justify-between py-1 border-b border-gray-50">
-            <span class="text-gray-600">API Latency (avg)</span>
-            <span class="mono font-medium text-gray-900">142 ms</span>
-          </div>
-          <div class="flex items-center justify-between py-1 border-b border-gray-50">
-            <span class="text-gray-600">360dialog Webhook</span>
-            <span class="text-green-600 font-medium">● Online</span>
-          </div>
-          <div class="flex items-center justify-between py-1 border-b border-gray-50">
-            <span class="text-gray-600">OpenAI API</span>
-            <span class="text-green-600 font-medium">● Online</span>
-          </div>
-          <div class="flex items-center justify-between py-1 border-b border-gray-50">
-            <span class="text-gray-600">DB Connections</span>
-            <span class="mono font-medium text-gray-900">18 / 100</span>
-          </div>
-          <div class="flex items-center justify-between py-1 border-b border-gray-50">
-            <span class="text-gray-600">Queue Depth</span>
-            <span class="mono font-medium text-gray-900">7 jobs</span>
-          </div>
-          <div class="flex items-center justify-between py-1 border-b border-gray-50">
-            <span class="text-gray-600">GCP Cloud Run</span>
-            <span class="text-green-600 font-medium">● 3 instances</span>
-          </div>
-          <div class="flex items-center justify-between py-1">
-            <span class="text-gray-600">Error Rate (1h)</span>
-            <span class="mono font-medium text-gray-900">0.02%</span>
-          </div>
-        </div>
+<!-- ==================== USAGE & BILLING ==================== -->
+<div id="tab-billing" class="tab-content">
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <h1 style="font-size:16px;font-weight:700;color:#111827;">Usage &amp; Billing</h1>
+      <p class="text-gray-500" style="font-size:12px;margin-top:2px;">AI credits, WhatsApp, voice usage and revenue overview (GAB-167)</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <div style="display:flex;">
+        <button class="period-btn" onclick="setPeriod(this)">7D</button>
+        <button class="period-btn active" onclick="setPeriod(this)">30D</button>
+        <button class="period-btn" onclick="setPeriod(this)">90D</button>
       </div>
+      <button class="btn-sm">Export CSV</button>
+    </div>
+  </div>
 
-      <!-- Recent activity log -->
-      <div class="col-span-2 bg-white border border-gray-200 rounded">
-        <div class="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
-          <span class="font-medium text-gray-800" style="font-size:12px">Activity Log</span>
-          <a href="#" class="text-indigo-600" style="font-size:11px">View all →</a>
-        </div>
-        <table class="w-full">
-          <thead>
-            <tr class="bg-gray-50 border-b border-gray-100">
-              <th class="px-3 py-1.5 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Time</th>
-              <th class="px-3 py-1.5 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Lead</th>
-              <th class="px-3 py-1.5 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Event</th>
-              <th class="px-3 py-1.5 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Org</th>
-              <th class="px-3 py-1.5 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Actor</th>
-            </tr>
-          </thead>
-          <tbody id="activity-tbody"></tbody>
-        </table>
+  <!-- Billing Stat Cards -->
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px;">
+    <div class="stat-card">
+      <div class="label">Total Revenue</div>
+      <div class="value mono" style="font-size:19px;">Rp 48.2M</div>
+      <div class="delta delta-up">+15.3% vs last mo</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">AI Credits Used</div>
+      <div class="value mono" style="font-size:19px;">12.4M</div>
+      <div class="delta delta-neutral">tokens this period</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">WhatsApp Messages</div>
+      <div class="value mono" style="font-size:19px;">8,432</div>
+      <div class="delta delta-up">+6.7% vs prev</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Voice Minutes</div>
+      <div class="value mono" style="font-size:19px;">234</div>
+      <div class="delta delta-neutral">min this period</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Cost / Conversation</div>
+      <div class="value mono" style="font-size:19px;">$0.42</div>
+      <div class="delta delta-up">-8% efficiency gain</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Avg Credits / Org</div>
+      <div class="value mono" style="font-size:19px;">520K</div>
+      <div class="delta delta-neutral">tokens avg</div>
+    </div>
+  </div>
+
+  <!-- SVG Line Chart -->
+  <div class="bg-white border border-gray-200 rounded-md shadow-sm mb-4 p-4">
+    <div class="flex items-center justify-between mb-3">
+      <span style="font-size:12px;font-weight:600;color:#111827;">Cost Trend — Last 6 Months</span>
+      <div style="display:flex;align-items:center;gap:20px;font-size:11px;color:#6b7280;">
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:20px;height:2px;background:#3b82f6;display:inline-block;border-radius:2px;"></span>AI Credits</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:20px;height:2px;background:#22c55e;display:inline-block;border-radius:2px;"></span>WhatsApp</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:20px;height:2px;background:#a855f7;display:inline-block;border-radius:2px;"></span>Voice</span>
       </div>
     </div>
+    <svg viewBox="0 0 720 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:160px;">
+      <!-- Grid -->
+      <line x1="58" y1="20" x2="700" y2="20" stroke="#f3f4f6" stroke-width="1"/>
+      <line x1="58" y1="50" x2="700" y2="50" stroke="#f3f4f6" stroke-width="1"/>
+      <line x1="58" y1="80" x2="700" y2="80" stroke="#f3f4f6" stroke-width="1"/>
+      <line x1="58" y1="110" x2="700" y2="110" stroke="#f3f4f6" stroke-width="1"/>
+      <line x1="58" y1="140" x2="700" y2="140" stroke="#e5e7eb" stroke-width="1"/>
+      <!-- Y labels -->
+      <text x="50" y="24" text-anchor="end" font-size="9" fill="#9ca3af" font-family="IBM Plex Mono">$6k</text>
+      <text x="50" y="54" text-anchor="end" font-size="9" fill="#9ca3af" font-family="IBM Plex Mono">$5k</text>
+      <text x="50" y="84" text-anchor="end" font-size="9" fill="#9ca3af" font-family="IBM Plex Mono">$4k</text>
+      <text x="50" y="114" text-anchor="end" font-size="9" fill="#9ca3af" font-family="IBM Plex Mono">$3k</text>
+      <text x="50" y="144" text-anchor="end" font-size="9" fill="#9ca3af" font-family="IBM Plex Mono">$2k</text>
+      <!-- X labels -->
+      <text x="120" y="156" text-anchor="middle" font-size="9" fill="#9ca3af" font-family="IBM Plex Sans">Oct</text>
+      <text x="240" y="156" text-anchor="middle" font-size="9" fill="#9ca3af" font-family="IBM Plex Sans">Nov</text>
+      <text x="360" y="156" text-anchor="middle" font-size="9" fill="#9ca3af" font-family="IBM Plex Sans">Dec</text>
+      <text x="480" y="156" text-anchor="middle" font-size="9" fill="#9ca3af" font-family="IBM Plex Sans">Jan</text>
+      <text x="580" y="156" text-anchor="middle" font-size="9" fill="#9ca3af" font-family="IBM Plex Sans">Feb</text>
+      <text x="660" y="156" text-anchor="middle" font-size="9" fill="#9ca3af" font-family="IBM Plex Sans">Mar</text>
+      <!-- AI Line (blue) — upward trend -->
+      <polyline points="120,100 240,88 360,72 480,58 580,44 660,34" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="120" cy="100" r="3.5" fill="#3b82f6"/><circle cx="240" cy="88" r="3.5" fill="#3b82f6"/><circle cx="360" cy="72" r="3.5" fill="#3b82f6"/><circle cx="480" cy="58" r="3.5" fill="#3b82f6"/><circle cx="580" cy="44" r="3.5" fill="#3b82f6"/><circle cx="660" cy="34" r="3.5" fill="#3b82f6"/>
+      <!-- WhatsApp Line (green) — steady growth -->
+      <polyline points="120,126 240,122 360,116 480,112 580,108 660,104" fill="none" stroke="#22c55e" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="120" cy="126" r="3.5" fill="#22c55e"/><circle cx="240" cy="122" r="3.5" fill="#22c55e"/><circle cx="360" cy="116" r="3.5" fill="#22c55e"/><circle cx="480" cy="112" r="3.5" fill="#22c55e"/><circle cx="580" cy="108" r="3.5" fill="#22c55e"/><circle cx="660" cy="104" r="3.5" fill="#22c55e"/>
+      <!-- Voice Line (purple) — slow growth -->
+      <polyline points="120,136 240,134 360,131 480,129 580,126 660,124" fill="none" stroke="#a855f7" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="120" cy="136" r="3.5" fill="#a855f7"/><circle cx="240" cy="134" r="3.5" fill="#a855f7"/><circle cx="360" cy="131" r="3.5" fill="#a855f7"/><circle cx="480" cy="129" r="3.5" fill="#a855f7"/><circle cx="580" cy="126" r="3.5" fill="#a855f7"/><circle cx="660" cy="124" r="3.5" fill="#a855f7"/>
+    </svg>
+  </div>
 
-    <!-- Top orgs mini-table -->
-    <div class="bg-white border border-gray-200 rounded">
-      <div class="px-3 py-2 border-b border-gray-100">
-        <span class="font-medium text-gray-800" style="font-size:12px">Top Organizations by Lead Volume</span>
-      </div>
-      <table class="w-full">
+  <!-- Per-Org Cost Table -->
+  <div class="bg-white border border-gray-200 rounded-md shadow-sm">
+    <div class="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
+      <span style="font-size:12px;font-weight:600;color:#111827;">Per-Organization Cost Breakdown</span>
+      <span style="font-size:11px;color:#9ca3af;">Amber rows approaching limit (85%+)</span>
+    </div>
+    <table>
+      <thead>
+        <tr class="table-header border-b border-gray-200">
+          <th class="text-left text-gray-500">Org Name</th>
+          <th class="text-left text-gray-500">Plan</th>
+          <th class="text-right text-gray-500">AI Cost</th>
+          <th class="text-right text-gray-500">WA Cost</th>
+          <th class="text-right text-gray-500">Voice Cost</th>
+          <th class="text-right text-gray-500">Total</th>
+          <th class="text-right text-gray-500">Limit %</th>
+          <th class="text-left text-gray-500" style="width:70px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr class="table-row"><td class="font-medium text-gray-900">Tokopedia CX</td><td><span class="badge badge-enterprise">Enterprise</span></td><td class="text-right mono text-gray-700">$1,240.50</td><td class="text-right mono text-gray-700">$320.00</td><td class="text-right mono text-gray-700">$180.00</td><td class="text-right mono font-semibold text-gray-900">$1,740.50</td><td class="text-right mono text-gray-500">42%</td><td><button class="btn-sm">Detail</button></td></tr>
+        <tr class="table-row"><td class="font-medium text-gray-900">Grab ID Operations</td><td><span class="badge badge-enterprise">Enterprise</span></td><td class="text-right mono text-gray-700">$1,120.30</td><td class="text-right mono text-gray-700">$280.60</td><td class="text-right mono text-gray-700">$210.00</td><td class="text-right mono font-semibold text-gray-900">$1,610.90</td><td class="text-right mono text-gray-500">29%</td><td><button class="btn-sm">Detail</button></td></tr>
+        <tr class="table-row"><td class="font-medium text-gray-900">GoTo Financial</td><td><span class="badge badge-enterprise">Enterprise</span></td><td class="text-right mono text-gray-700">$980.00</td><td class="text-right mono text-gray-700">$210.40</td><td class="text-right mono text-gray-700">$140.00</td><td class="text-right mono font-semibold text-gray-900">$1,330.40</td><td class="text-right mono text-gray-500">38%</td><td><button class="btn-sm">Detail</button></td></tr>
+        <tr class="table-row"><td class="font-medium text-gray-900">Indofood CRM Team</td><td><span class="badge badge-enterprise">Enterprise</span></td><td class="text-right mono text-gray-700">$890.00</td><td class="text-right mono text-gray-700">$198.30</td><td class="text-right mono text-gray-700">$95.00</td><td class="text-right mono font-semibold text-gray-900">$1,183.30</td><td class="text-right mono text-gray-500">31%</td><td><button class="btn-sm">Detail</button></td></tr>
+        <tr class="table-row"><td class="font-medium text-gray-900">Bukalapak Support</td><td><span class="badge badge-pro">Pro</span></td><td class="text-right mono text-gray-700">$440.20</td><td class="text-right mono text-gray-700">$89.50</td><td class="text-right mono text-gray-700">$0.00</td><td class="text-right mono font-semibold text-gray-900">$529.70</td><td class="text-right mono text-gray-500">63%</td><td><button class="btn-sm">Detail</button></td></tr>
+        <tr class="highlight-row"><td class="font-medium text-gray-900">Akulaku Indonesia</td><td><span class="badge badge-pro">Pro</span></td><td class="text-right mono text-gray-700">$350.10</td><td class="text-right mono text-gray-700">$68.40</td><td class="text-right mono text-gray-700">$0.00</td><td class="text-right mono font-semibold text-gray-900">$418.50</td><td class="text-right mono font-semibold" style="color:#d97706;">91%</td><td><button class="btn-sm">Detail</button></td></tr>
+        <tr class="table-row"><td class="font-medium text-gray-900">PT Maju Bersama</td><td><span class="badge badge-pro">Pro</span></td><td class="text-right mono text-gray-700">$310.40</td><td class="text-right mono text-gray-700">$62.00</td><td class="text-right mono text-gray-700">$45.00</td><td class="text-right mono font-semibold text-gray-900">$417.40</td><td class="text-right mono text-gray-500">58%</td><td><button class="btn-sm">Detail</button></td></tr>
+        <tr class="highlight-row"><td class="font-medium text-gray-900">PT Sinar Harapan</td><td><span class="badge badge-pro">Pro</span></td><td class="text-right mono text-gray-700">$390.80</td><td class="text-right mono text-gray-700">$72.10</td><td class="text-right mono text-gray-700">$0.00</td><td class="text-right mono font-semibold text-gray-900">$462.90</td><td class="text-right mono font-semibold" style="color:#d97706;">87%</td><td><button class="btn-sm">Detail</button></td></tr>
+        <tr class="table-row"><td class="font-medium text-gray-900">Traveloka CX</td><td><span class="badge badge-pro">Pro</span></td><td class="text-right mono text-gray-700">$280.60</td><td class="text-right mono text-gray-700">$55.80</td><td class="text-right mono text-gray-700">$0.00</td><td class="text-right mono font-semibold text-gray-900">$336.40</td><td class="text-right mono text-gray-500">47%</td><td><button class="btn-sm">Detail</button></td></tr>
+        <tr class="table-row"><td class="font-medium text-gray-900">CV Teknologi Nusantara</td><td><span class="badge badge-starter">Starter</span></td><td class="text-right mono text-gray-700">$78.40</td><td class="text-right mono text-gray-700">$18.20</td><td class="text-right mono text-gray-700">$0.00</td><td class="text-right mono font-semibold text-gray-900">$96.60</td><td class="text-right mono text-gray-500">55%</td><td><button class="btn-sm">Detail</button></td></tr>
+        <tr class="table-row"><td class="font-medium text-gray-900">Kopi Kenangan HQ</td><td><span class="badge badge-starter">Starter</span></td><td class="text-right mono text-gray-700">$62.10</td><td class="text-right mono text-gray-700">$14.50</td><td class="text-right mono text-gray-700">$0.00</td><td class="text-right mono font-semibold text-gray-900">$76.60</td><td class="text-right mono text-gray-500">43%</td><td><button class="btn-sm">Detail</button></td></tr>
+        <tr class="table-row"><td class="font-medium text-gray-900">PT Berkah Mandiri</td><td><span class="badge badge-starter">Starter</span></td><td class="text-right mono text-gray-700">$24.80</td><td class="text-right mono text-gray-700">$6.20</td><td class="text-right mono text-gray-700">$0.00</td><td class="text-right mono font-semibold text-gray-900">$31.00</td><td class="text-right mono text-gray-500">18%</td><td><button class="btn-sm">Detail</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== LEADS ==================== -->
+<div id="tab-leads" class="tab-content">
+  <div class="flex items-center justify-between mb-3">
+    <div>
+      <h1 style="font-size:16px;font-weight:700;color:#111827;">Leads</h1>
+      <p class="text-gray-500" style="font-size:12px;margin-top:2px;">All leads across workspaces — 84 total</p>
+    </div>
+    <button class="btn-primary">+ Add Lead</button>
+  </div>
+
+  <!-- Sub-tabs -->
+  <div style="display:flex;align-items:center;gap:4px;margin-bottom:12px;">
+    <button class="sub-tab active" onclick="switchSubTab('leads-table',this)">Table</button>
+    <button class="sub-tab" onclick="switchSubTab('leads-pipeline',this)">Pipeline</button>
+    <button class="sub-tab" onclick="switchSubTab('leads-funnel',this)">Funnel</button>
+  </div>
+
+  <!-- TABLE -->
+  <div id="leads-table">
+    <div class="flex items-center gap-2 mb-3">
+      <input class="input-sm" placeholder="Search name, phone..." style="width:220px;">
+      <select class="input-sm">
+        <option>All Stages</option>
+        <option>New</option><option>Qualified</option><option>Contacted</option>
+        <option>Negotiation</option><option>Converted</option><option>Lost</option>
+      </select>
+      <select class="input-sm">
+        <option>All Sources</option>
+        <option>WhatsApp</option><option>Voice</option><option>Campaign</option><option>Manual</option>
+      </select>
+      <select class="input-sm">
+        <option>All Workspaces</option>
+        <option>Tokopedia CX</option><option>GoTo Financial</option>
+      </select>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-md shadow-sm">
+      <table>
         <thead>
-          <tr class="bg-gray-50 border-b border-gray-100">
-            <th class="px-3 py-1.5 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">#</th>
-            <th class="px-3 py-1.5 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Organization</th>
-            <th class="px-3 py-1.5 text-right font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Leads</th>
-            <th class="px-3 py-1.5 text-right font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Won</th>
-            <th class="px-3 py-1.5 text-right font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Conv%</th>
-            <th class="px-3 py-1.5 text-right font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Monthly Cost</th>
-            <th class="px-3 py-1.5 text-right font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Cost/Lead</th>
-            <th class="px-3 py-1.5 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Plan</th>
+          <tr class="table-header border-b border-gray-200">
+            <th class="text-left text-gray-500">Name</th>
+            <th class="text-left text-gray-500">Phone</th>
+            <th class="text-left text-gray-500">Source</th>
+            <th class="text-left text-gray-500">Stage</th>
+            <th class="text-right text-gray-500">Score</th>
+            <th class="text-left text-gray-500">Assigned</th>
+            <th class="text-left text-gray-500">Updated</th>
+            <th class="text-left text-gray-500" style="width:70px;">Actions</th>
           </tr>
         </thead>
-        <tbody id="top-orgs-tbody"></tbody>
+        <tbody class="divide-y divide-gray-100">
+          <tr class="table-row"><td class="font-medium text-gray-900">Budi Santoso</td><td class="mono text-gray-500" style="font-size:11px;">+6281234567890</td><td><span class="badge badge-whatsapp">WhatsApp</span></td><td><span class="badge badge-new">New</span></td><td class="text-right mono score-mid font-medium">24</td><td class="text-gray-600" style="font-size:12px;">Andi W.</td><td class="mono text-gray-400" style="font-size:11px;">10 min ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Dewi Rahayu</td><td class="mono text-gray-500" style="font-size:11px;">+6289876543210</td><td><span class="badge badge-whatsapp">WhatsApp</span></td><td><span class="badge badge-negotiation">Negotiation</span></td><td class="text-right mono score-high font-medium">82</td><td class="text-gray-600" style="font-size:12px;">Andi W.</td><td class="mono text-gray-400" style="font-size:11px;">1 hr ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Rizky Pratama</td><td class="mono text-gray-500" style="font-size:11px;">+6285551234567</td><td><span class="badge badge-voice">Voice</span></td><td><span class="badge badge-qualified">Qualified</span></td><td class="text-right mono score-high font-medium">71</td><td class="text-gray-600" style="font-size:12px;">Sari M.</td><td class="mono text-gray-400" style="font-size:11px;">2 hr ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Siti Nurhaliza</td><td class="mono text-gray-500" style="font-size:11px;">+6281199887766</td><td><span class="badge badge-campaign">Campaign</span></td><td><span class="badge badge-contacted">Contacted</span></td><td class="text-right mono score-high font-medium">65</td><td class="text-gray-600" style="font-size:12px;">Rini P.</td><td class="mono text-gray-400" style="font-size:11px;">3 hr ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Ahmad Fauzi</td><td class="mono text-gray-500" style="font-size:11px;">+6287712345678</td><td><span class="badge badge-manual">Manual</span></td><td><span class="badge badge-converted">Converted</span></td><td class="text-right mono score-high font-medium">93</td><td class="text-gray-600" style="font-size:12px;">Bima K.</td><td class="mono text-gray-400" style="font-size:11px;">Yesterday</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Rina Wulandari</td><td class="mono text-gray-500" style="font-size:11px;">+6282234567891</td><td><span class="badge badge-whatsapp">WhatsApp</span></td><td><span class="badge badge-new">New</span></td><td class="text-right mono score-low font-medium">18</td><td class="text-gray-600" style="font-size:12px;">Unassigned</td><td class="mono text-gray-400" style="font-size:11px;">Yesterday</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Hendra Kusuma</td><td class="mono text-gray-500" style="font-size:11px;">+6288899001122</td><td><span class="badge badge-voice">Voice</span></td><td><span class="badge badge-qualified">Qualified</span></td><td class="text-right mono score-high font-medium">78</td><td class="text-gray-600" style="font-size:12px;">Andi W.</td><td class="mono text-gray-400" style="font-size:11px;">2 days ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Lestari Indah</td><td class="mono text-gray-500" style="font-size:11px;">+6281122334455</td><td><span class="badge badge-campaign">Campaign</span></td><td><span class="badge badge-lost">Lost</span></td><td class="text-right mono score-low font-medium">12</td><td class="text-gray-600" style="font-size:12px;">Rini P.</td><td class="mono text-gray-400" style="font-size:11px;">2 days ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Wahyu Setiawan</td><td class="mono text-gray-500" style="font-size:11px;">+6283344556677</td><td><span class="badge badge-whatsapp">WhatsApp</span></td><td><span class="badge badge-contacted">Contacted</span></td><td class="text-right mono score-mid font-medium">55</td><td class="text-gray-600" style="font-size:12px;">Sari M.</td><td class="mono text-gray-400" style="font-size:11px;">2 days ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Putri Anggraeni</td><td class="mono text-gray-500" style="font-size:11px;">+6285566778899</td><td><span class="badge badge-manual">Manual</span></td><td><span class="badge badge-negotiation">Negotiation</span></td><td class="text-right mono score-high font-medium">88</td><td class="text-gray-600" style="font-size:12px;">Bima K.</td><td class="mono text-gray-400" style="font-size:11px;">3 days ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Dian Permata</td><td class="mono text-gray-500" style="font-size:11px;">+6287788990011</td><td><span class="badge badge-voice">Voice</span></td><td><span class="badge badge-new">New</span></td><td class="text-right mono score-mid font-medium">41</td><td class="text-gray-600" style="font-size:12px;">Unassigned</td><td class="mono text-gray-400" style="font-size:11px;">3 days ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Fajar Nugroho</td><td class="mono text-gray-500" style="font-size:11px;">+6281100223344</td><td><span class="badge badge-campaign">Campaign</span></td><td><span class="badge badge-qualified">Qualified</span></td><td class="text-right mono score-high font-medium">69</td><td class="text-gray-600" style="font-size:12px;">Andi W.</td><td class="mono text-gray-400" style="font-size:11px;">4 days ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Mega Puspita</td><td class="mono text-gray-500" style="font-size:11px;">+6289911223344</td><td><span class="badge badge-whatsapp">WhatsApp</span></td><td><span class="badge badge-contacted">Contacted</span></td><td class="text-right mono score-mid font-medium">58</td><td class="text-gray-600" style="font-size:12px;">Rini P.</td><td class="mono text-gray-400" style="font-size:11px;">4 days ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Surya Dinata</td><td class="mono text-gray-500" style="font-size:11px;">+6282255667788</td><td><span class="badge badge-manual">Manual</span></td><td><span class="badge badge-converted">Converted</span></td><td class="text-right mono score-high font-medium">96</td><td class="text-gray-600" style="font-size:12px;">Bima K.</td><td class="mono text-gray-400" style="font-size:11px;">5 days ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Eka Sulistyo</td><td class="mono text-gray-500" style="font-size:11px;">+6281366778899</td><td><span class="badge badge-voice">Voice</span></td><td><span class="badge badge-new">New</span></td><td class="text-right mono score-low font-medium">22</td><td class="text-gray-600" style="font-size:12px;">Unassigned</td><td class="mono text-gray-400" style="font-size:11px;">5 days ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Nurul Hidayah</td><td class="mono text-gray-500" style="font-size:11px;">+6288844556677</td><td><span class="badge badge-campaign">Campaign</span></td><td><span class="badge badge-negotiation">Negotiation</span></td><td class="text-right mono score-high font-medium">76</td><td class="text-gray-600" style="font-size:12px;">Sari M.</td><td class="mono text-gray-400" style="font-size:11px;">6 days ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Agus Hermawan</td><td class="mono text-gray-500" style="font-size:11px;">+6285599001122</td><td><span class="badge badge-whatsapp">WhatsApp</span></td><td><span class="badge badge-qualified">Qualified</span></td><td class="text-right mono score-high font-medium">63</td><td class="text-gray-600" style="font-size:12px;">Andi W.</td><td class="mono text-gray-400" style="font-size:11px;">6 days ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Fitria Handayani</td><td class="mono text-gray-500" style="font-size:11px;">+6281177889900</td><td><span class="badge badge-manual">Manual</span></td><td><span class="badge badge-lost">Lost</span></td><td class="text-right mono score-low font-medium">8</td><td class="text-gray-600" style="font-size:12px;">Rini P.</td><td class="mono text-gray-400" style="font-size:11px;">1 wk ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Yoga Pratomo</td><td class="mono text-gray-500" style="font-size:11px;">+6283311223344</td><td><span class="badge badge-voice">Voice</span></td><td><span class="badge badge-contacted">Contacted</span></td><td class="text-right mono score-mid font-medium">49</td><td class="text-gray-600" style="font-size:12px;">Bima K.</td><td class="mono text-gray-400" style="font-size:11px;">1 wk ago</td><td><button class="btn-sm">▾</button></td></tr>
+          <tr class="table-row"><td class="font-medium text-gray-900">Intan Permatasari</td><td class="mono text-gray-500" style="font-size:11px;">+6282266778899</td><td><span class="badge badge-campaign">Campaign</span></td><td><span class="badge badge-new">New</span></td><td class="text-right mono score-mid font-medium">35</td><td class="text-gray-600" style="font-size:12px;">Unassigned</td><td class="mono text-gray-400" style="font-size:11px;">1 wk ago</td><td><button class="btn-sm">▾</button></td></tr>
+        </tbody>
       </table>
-    </div>
-  </div>
-
-  <!-- ===== LEADS ===== -->
-  <div id="tab-content-leads" class="tab-content">
-
-    <!-- Sub-tabs -->
-    <div class="flex gap-1 mb-2">
-      <button onclick="showSubTab('leads','table')" id="sub-leads-table" class="sub-tab-btn border border-indigo-300 bg-indigo-50 text-indigo-700 font-medium rounded px-2.5 py-1" style="font-size:11px">Table</button>
-      <button onclick="showSubTab('leads','pipeline')" id="sub-leads-pipeline" class="sub-tab-btn border border-gray-200 bg-white text-gray-600 rounded px-2.5 py-1 hover:bg-gray-50" style="font-size:11px">Pipeline</button>
-      <button onclick="showSubTab('leads','funnel')" id="sub-leads-funnel" class="sub-tab-btn border border-gray-200 bg-white text-gray-600 rounded px-2.5 py-1 hover:bg-gray-50" style="font-size:11px">Funnel</button>
-    </div>
-
-    <!-- Table sub-tab -->
-    <div id="sub-leads-table-content" class="sub-tab-content active">
-      <!-- Filter pills row -->
-      <div class="flex flex-wrap gap-1.5 mb-2 items-center">
-        <input type="text" placeholder="Search name, phone, email..." class="border border-gray-200 rounded px-2.5 py-1 text-gray-700 focus:outline-none focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 bg-white" style="font-size:12px;width:220px"/>
-        <select class="border border-gray-200 rounded px-2 py-1 text-gray-700 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-300" style="font-size:12px">
-          <option>All Sources</option><option>WhatsApp</option><option>Website</option><option>Referral</option><option>Cold Outreach</option>
-        </select>
-        <select class="border border-gray-200 rounded px-2 py-1 text-gray-700 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-300" style="font-size:12px">
-          <option>All Stages</option><option>New</option><option>Contacted</option><option>Qualified</option><option>Negotiation</option><option>Won</option><option>Lost</option>
-        </select>
-        <select class="border border-gray-200 rounded px-2 py-1 text-gray-700 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-300" style="font-size:12px">
-          <option>All Orgs</option><option>PT Maju Bersama</option><option>CV Sejahtera</option><option>PT Solusi Digital</option><option>UD Karya Mandiri</option>
-        </select>
-        <select class="border border-gray-200 rounded px-2 py-1 text-gray-700 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-300" style="font-size:12px">
-          <option>Score: Any</option><option>Score ≥ 80</option><option>Score 50–79</option><option>Score &lt; 50</option>
-        </select>
-        <button class="bg-indigo-600 text-white rounded px-2.5 py-1 hover:bg-indigo-700 font-medium" style="font-size:11px">Apply</button>
-        <button class="border border-gray-200 bg-white text-gray-600 rounded px-2.5 py-1 hover:bg-gray-50" style="font-size:11px">Reset</button>
-        <div class="ml-auto flex items-center gap-1.5">
-          <button class="border border-gray-200 bg-white text-gray-600 rounded px-2 py-1 hover:bg-gray-50" style="font-size:11px">Bulk Actions ▾</button>
-          <span class="text-gray-400" style="font-size:11px">25 of 4,821</span>
-        </div>
-      </div>
-
-      <!-- Bulk select bar (hidden by default, shown when rows selected) -->
-      <div class="bg-indigo-50 border border-indigo-200 rounded px-3 py-1.5 mb-2 flex items-center gap-3" style="display:none">
-        <span class="text-indigo-700 font-medium" style="font-size:12px">3 rows selected</span>
-        <button class="text-indigo-600 hover:underline" style="font-size:11px">Assign</button>
-        <button class="text-indigo-600 hover:underline" style="font-size:11px">Change Stage</button>
-        <button class="text-red-500 hover:underline" style="font-size:11px">Delete</button>
-        <button class="ml-auto text-gray-500" style="font-size:11px">✕ Clear</button>
-      </div>
-
-      <div class="bg-white border border-gray-200 rounded overflow-hidden">
-        <table class="w-full">
-          <thead>
-            <tr class="bg-gray-50 border-b border-gray-200">
-              <th class="px-2 py-2 w-6"><input type="checkbox" class="rounded border-gray-300"/></th>
-              <th class="px-2 py-2 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Name</th>
-              <th class="px-2 py-2 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Phone</th>
-              <th class="px-2 py-2 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Org</th>
-              <th class="px-2 py-2 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Source</th>
-              <th class="px-2 py-2 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Stage</th>
-              <th class="px-2 py-2 text-right font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Score</th>
-              <th class="px-2 py-2 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Assigned</th>
-              <th class="px-2 py-2 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Last Contact</th>
-              <th class="px-2 py-2 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Act.</th>
-            </tr>
-          </thead>
-          <tbody id="dense-leads-tbody"></tbody>
-        </table>
-        <!-- Compact pagination -->
-        <div class="px-3 py-2 border-t border-gray-100 flex items-center justify-between bg-white">
-          <span class="text-gray-400 mono" style="font-size:11px">1–25 of 4,821</span>
-          <div class="flex items-center gap-0.5">
-            <button class="border border-gray-200 rounded px-2 py-0.5 text-gray-500 hover:bg-gray-50" style="font-size:11px">«</button>
-            <button class="border border-gray-200 rounded px-2 py-0.5 text-gray-500 hover:bg-gray-50" style="font-size:11px">‹</button>
-            <button class="border border-indigo-400 bg-indigo-50 text-indigo-700 rounded px-2 py-0.5 font-medium" style="font-size:11px">1</button>
-            <button class="border border-gray-200 rounded px-2 py-0.5 text-gray-500 hover:bg-gray-50" style="font-size:11px">2</button>
-            <button class="border border-gray-200 rounded px-2 py-0.5 text-gray-500 hover:bg-gray-50" style="font-size:11px">3</button>
-            <button class="border border-gray-200 rounded px-1.5 py-0.5 text-gray-400" style="font-size:11px">…</button>
-            <button class="border border-gray-200 rounded px-2 py-0.5 text-gray-500 hover:bg-gray-50" style="font-size:11px">193</button>
-            <button class="border border-gray-200 rounded px-2 py-0.5 text-gray-500 hover:bg-gray-50" style="font-size:11px">›</button>
-            <button class="border border-gray-200 rounded px-2 py-0.5 text-gray-500 hover:bg-gray-50" style="font-size:11px">»</button>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="text-gray-400" style="font-size:11px">Rows:</span>
-            <select class="border border-gray-200 rounded px-1.5 py-0.5 bg-white" style="font-size:11px"><option>25</option><option>50</option><option>100</option></select>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pipeline sub-tab -->
-    <div id="sub-leads-pipeline-content" class="sub-tab-content">
-      <div class="flex gap-2 overflow-x-auto pb-2">
-        <div class="flex-shrink-0 w-44 bg-white border border-gray-200 rounded">
-          <div class="px-2 py-1.5 bg-gray-50 border-b border-gray-200 flex items-center justify-between"><span class="font-medium text-gray-700" style="font-size:11px">New</span><span class="bg-gray-200 text-gray-700 rounded-full px-1.5 py-0.5 mono" style="font-size:10px">342</span></div>
-          <div class="p-1.5 space-y-1" id="kanban-new"></div>
-        </div>
-        <div class="flex-shrink-0 w-44 bg-white border border-gray-200 rounded">
-          <div class="px-2 py-1.5 bg-blue-50 border-b border-gray-200 flex items-center justify-between"><span class="font-medium text-blue-700" style="font-size:11px">Contacted</span><span class="bg-blue-100 text-blue-700 rounded-full px-1.5 py-0.5 mono" style="font-size:10px">218</span></div>
-          <div class="p-1.5 space-y-1" id="kanban-contacted"></div>
-        </div>
-        <div class="flex-shrink-0 w-44 bg-white border border-gray-200 rounded">
-          <div class="px-2 py-1.5 bg-yellow-50 border-b border-gray-200 flex items-center justify-between"><span class="font-medium text-yellow-700" style="font-size:11px">Qualified</span><span class="bg-yellow-100 text-yellow-700 rounded-full px-1.5 py-0.5 mono" style="font-size:10px">97</span></div>
-          <div class="p-1.5 space-y-1" id="kanban-qualified"></div>
-        </div>
-        <div class="flex-shrink-0 w-44 bg-white border border-gray-200 rounded">
-          <div class="px-2 py-1.5 bg-purple-50 border-b border-gray-200 flex items-center justify-between"><span class="font-medium text-purple-700" style="font-size:11px">Negotiation</span><span class="bg-purple-100 text-purple-700 rounded-full px-1.5 py-0.5 mono" style="font-size:10px">43</span></div>
-          <div class="p-1.5 space-y-1" id="kanban-negotiation"></div>
-        </div>
-        <div class="flex-shrink-0 w-44 bg-white border border-gray-200 rounded">
-          <div class="px-2 py-1.5 bg-green-50 border-b border-gray-200 flex items-center justify-between"><span class="font-medium text-green-700" style="font-size:11px">Won</span><span class="bg-green-100 text-green-700 rounded-full px-1.5 py-0.5 mono" style="font-size:10px">112</span></div>
-          <div class="p-1.5 space-y-1" id="kanban-won"></div>
-        </div>
-        <div class="flex-shrink-0 w-44 bg-white border border-gray-200 rounded">
-          <div class="px-2 py-1.5 bg-red-50 border-b border-gray-200 flex items-center justify-between"><span class="font-medium text-red-600" style="font-size:11px">Lost</span><span class="bg-red-100 text-red-600 rounded-full px-1.5 py-0.5 mono" style="font-size:10px">89</span></div>
-          <div class="p-1.5 space-y-1" id="kanban-lost"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Funnel sub-tab -->
-    <div id="sub-leads-funnel-content" class="sub-tab-content">
-      <div class="bg-white border border-gray-200 rounded p-4 max-w-xl">
-        <div class="font-medium text-gray-800 mb-3" style="font-size:12px">Conversion Funnel</div>
-        <div class="space-y-2">
-          <div class="flex items-center gap-2"><span class="w-20 text-right text-gray-600 flex-shrink-0" style="font-size:11px">New</span><div class="flex-1 bg-indigo-100 rounded h-7 flex items-center px-2"><span class="mono font-medium text-indigo-800" style="font-size:11px">342</span></div><span class="w-10 text-right text-gray-500 mono flex-shrink-0" style="font-size:10px">100%</span></div>
-          <div class="flex items-center gap-2"><span class="w-20 text-right text-gray-600 flex-shrink-0" style="font-size:11px">Contacted</span><div class="bg-indigo-200 rounded h-7 flex items-center px-2" style="width:63.7%"><span class="mono font-medium text-indigo-900" style="font-size:11px">218</span></div><span class="w-10 text-right text-gray-500 mono flex-shrink-0" style="font-size:10px">63.7%</span></div>
-          <div class="flex items-center gap-2"><span class="w-20 text-right text-gray-600 flex-shrink-0" style="font-size:11px">Qualified</span><div class="bg-indigo-300 rounded h-7 flex items-center px-2" style="width:28.4%"><span class="mono font-medium text-white" style="font-size:11px">97</span></div><span class="w-10 text-right text-gray-500 mono flex-shrink-0" style="font-size:10px">28.4%</span></div>
-          <div class="flex items-center gap-2"><span class="w-20 text-right text-gray-600 flex-shrink-0" style="font-size:11px">Negotiation</span><div class="bg-purple-300 rounded h-7 flex items-center px-2" style="width:12.6%"><span class="mono font-medium text-white" style="font-size:11px">43</span></div><span class="w-10 text-right text-gray-500 mono flex-shrink-0" style="font-size:10px">12.6%</span></div>
-          <div class="flex items-center gap-2"><span class="w-20 text-right text-green-700 flex-shrink-0 font-medium" style="font-size:11px">Won</span><div class="bg-green-400 rounded h-7 flex items-center px-2" style="width:32.7%"><span class="mono font-medium text-white" style="font-size:11px">112</span></div><span class="w-10 text-right text-green-600 mono flex-shrink-0 font-medium" style="font-size:10px">32.7%</span></div>
-        </div>
-        <div class="mt-3 pt-2 border-t border-gray-100 grid grid-cols-3 gap-2">
-          <div class="text-center"><div class="mono font-semibold text-gray-900" style="font-size:14px">18.7%</div><div class="text-gray-500" style="font-size:10px">Overall conv.</div></div>
-          <div class="text-center"><div class="mono font-semibold text-gray-900" style="font-size:14px">Rp 1,708</div><div class="text-gray-500" style="font-size:10px">Avg cost/lead</div></div>
-          <div class="text-center"><div class="mono font-semibold text-gray-900" style="font-size:14px">8.4d</div><div class="text-gray-500" style="font-size:10px">Avg time to close</div></div>
+      <div class="px-4 py-2 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+        <span class="mono text-gray-500" style="font-size:11px;">Showing 1–20 of 84 leads</span>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <button class="btn-sm" disabled style="color:#d1d5db;border-color:#e5e7eb;">&#8592; Prev</button>
+          <button class="btn-sm" style="background:#eef2ff;border-color:#a5b4fc;color:#4f46e5;">1</button>
+          <button class="btn-sm">2</button>
+          <button class="btn-sm">3</button>
+          <button class="btn-sm">4</button>
+          <button class="btn-sm">5</button>
+          <button class="btn-sm">Next &#8594;</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ===== COSTS ===== -->
-  <div id="tab-content-costs" class="tab-content">
-
-    <!-- 6 stats row -->
-    <div class="grid grid-cols-6 gap-2 mb-3">
-      <div class="bg-white border border-gray-200 rounded p-2.5"><div class="text-gray-500 mb-0.5" style="font-size:10px;text-transform:uppercase">Total Monthly</div><div class="font-semibold text-gray-900 mono" style="font-size:17px">Rp 8.24M</div><div class="text-green-600" style="font-size:10px">▼ -5.3% MoM</div></div>
-      <div class="bg-white border border-gray-200 rounded p-2.5"><div class="text-gray-500 mb-0.5" style="font-size:10px;text-transform:uppercase">OpenAI API</div><div class="font-semibold text-gray-900 mono" style="font-size:17px">Rp 3.1M</div><div class="text-red-500" style="font-size:10px">▲ +8.2% MoM</div></div>
-      <div class="bg-white border border-gray-200 rounded p-2.5"><div class="text-gray-500 mb-0.5" style="font-size:10px;text-transform:uppercase">360dialog WA</div><div class="font-semibold text-gray-900 mono" style="font-size:17px">Rp 2.8M</div><div class="text-green-600" style="font-size:10px">▼ -2.1% MoM</div></div>
-      <div class="bg-white border border-gray-200 rounded p-2.5"><div class="text-gray-500 mb-0.5" style="font-size:10px;text-transform:uppercase">Infra / GCP</div><div class="font-semibold text-gray-900 mono" style="font-size:17px">Rp 1.4M</div><div class="text-gray-400" style="font-size:10px">Stable</div></div>
-      <div class="bg-white border border-gray-200 rounded p-2.5"><div class="text-gray-500 mb-0.5" style="font-size:10px;text-transform:uppercase">Cost / Lead</div><div class="font-semibold text-gray-900 mono" style="font-size:17px">Rp 1,708</div><div class="text-green-600" style="font-size:10px">▼ -11.4% MoM</div></div>
-      <div class="bg-white border border-gray-200 rounded p-2.5"><div class="text-gray-500 mb-0.5" style="font-size:10px;text-transform:uppercase">YTD Total</div><div class="font-semibold text-gray-900 mono" style="font-size:17px">Rp 23.6M</div><div class="text-gray-400" style="font-size:10px">Budget: Rp 30M</div></div>
+  <!-- PIPELINE -->
+  <div id="leads-pipeline" style="display:none;">
+    <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;min-height:280px;">
+      <div class="kanban-col">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:11px;font-weight:600;color:#374151;">New</span><span class="badge badge-new mono" style="font-size:10px;">18</span></div>
+        <div class="kanban-card"><div class="font-medium text-gray-900" style="margin-bottom:3px;">Eka Sulistyo</div><div class="text-gray-500" style="font-size:11px;">Voice &middot; Score <span class="score-low font-medium">22</span></div><div class="text-gray-400" style="font-size:10px;margin-top:3px;">Unassigned</div></div>
+        <div class="kanban-card"><div class="font-medium text-gray-900" style="margin-bottom:3px;">Rina Wulandari</div><div class="text-gray-500" style="font-size:11px;">WhatsApp &middot; Score <span class="score-low font-medium">18</span></div><div class="text-gray-400" style="font-size:10px;margin-top:3px;">Unassigned</div></div>
+        <div class="kanban-card"><div class="font-medium text-gray-900" style="margin-bottom:3px;">Budi Santoso</div><div class="text-gray-500" style="font-size:11px;">WhatsApp &middot; Score <span class="score-mid font-medium">24</span></div><div class="text-gray-400" style="font-size:10px;margin-top:3px;">Andi W.</div></div>
+      </div>
+      <div class="kanban-col">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:11px;font-weight:600;color:#374151;">Qualified</span><span class="badge badge-qualified mono" style="font-size:10px;">22</span></div>
+        <div class="kanban-card"><div class="font-medium text-gray-900" style="margin-bottom:3px;">Rizky Pratama</div><div class="text-gray-500" style="font-size:11px;">Voice &middot; Score <span class="score-high font-medium">71</span></div><div class="text-gray-400" style="font-size:10px;margin-top:3px;">Sari M.</div></div>
+        <div class="kanban-card"><div class="font-medium text-gray-900" style="margin-bottom:3px;">Hendra Kusuma</div><div class="text-gray-500" style="font-size:11px;">Voice &middot; Score <span class="score-high font-medium">78</span></div><div class="text-gray-400" style="font-size:10px;margin-top:3px;">Andi W.</div></div>
+        <div class="kanban-card"><div class="font-medium text-gray-900" style="margin-bottom:3px;">Agus Hermawan</div><div class="text-gray-500" style="font-size:11px;">WhatsApp &middot; Score <span class="score-high font-medium">63</span></div><div class="text-gray-400" style="font-size:10px;margin-top:3px;">Andi W.</div></div>
+      </div>
+      <div class="kanban-col">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:11px;font-weight:600;color:#374151;">Contacted</span><span class="badge badge-contacted mono" style="font-size:10px;">16</span></div>
+        <div class="kanban-card"><div class="font-medium text-gray-900" style="margin-bottom:3px;">Siti Nurhaliza</div><div class="text-gray-500" style="font-size:11px;">Campaign &middot; Score <span class="score-high font-medium">65</span></div><div class="text-gray-400" style="font-size:10px;margin-top:3px;">Rini P.</div></div>
+        <div class="kanban-card"><div class="font-medium text-gray-900" style="margin-bottom:3px;">Wahyu Setiawan</div><div class="text-gray-500" style="font-size:11px;">WhatsApp &middot; Score <span class="score-mid font-medium">55</span></div><div class="text-gray-400" style="font-size:10px;margin-top:3px;">Sari M.</div></div>
+        <div class="kanban-card"><div class="font-medium text-gray-900" style="margin-bottom:3px;">Yoga Pratomo</div><div class="text-gray-500" style="font-size:11px;">Voice &middot; Score <span class="score-mid font-medium">49</span></div><div class="text-gray-400" style="font-size:10px;margin-top:3px;">Bima K.</div></div>
+      </div>
+      <div class="kanban-col">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:11px;font-weight:600;color:#374151;">Negotiation</span><span class="badge badge-negotiation mono" style="font-size:10px;">11</span></div>
+        <div class="kanban-card"><div class="font-medium text-gray-900" style="margin-bottom:3px;">Dewi Rahayu</div><div class="text-gray-500" style="font-size:11px;">WhatsApp &middot; Score <span class="score-high font-medium">82</span></div><div class="text-gray-400" style="font-size:10px;margin-top:3px;">Andi W.</div></div>
+        <div class="kanban-card"><div class="font-medium text-gray-900" style="margin-bottom:3px;">Putri Anggraeni</div><div class="text-gray-500" style="font-size:11px;">Manual &middot; Score <span class="score-high font-medium">88</span></div><div class="text-gray-400" style="font-size:10px;margin-top:3px;">Bima K.</div></div>
+        <div class="kanban-card"><div class="font-medium text-gray-900" style="margin-bottom:3px;">Nurul Hidayah</div><div class="text-gray-500" style="font-size:11px;">Campaign &middot; Score <span class="score-high font-medium">76</span></div><div class="text-gray-400" style="font-size:10px;margin-top:3px;">Sari M.</div></div>
+      </div>
+      <div class="kanban-col">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:11px;font-weight:600;color:#374151;">Converted</span><span class="badge badge-converted mono" style="font-size:10px;">14</span></div>
+        <div class="kanban-card"><div class="font-medium text-gray-900" style="margin-bottom:3px;">Ahmad Fauzi</div><div class="text-gray-500" style="font-size:11px;">Manual &middot; Score <span class="score-high font-medium">93</span></div><div class="text-gray-400" style="font-size:10px;margin-top:3px;">Bima K.</div></div>
+        <div class="kanban-card"><div class="font-medium text-gray-900" style="margin-bottom:3px;">Surya Dinata</div><div class="text-gray-500" style="font-size:11px;">Manual &middot; Score <span class="score-high font-medium">96</span></div><div class="text-gray-400" style="font-size:10px;margin-top:3px;">Bima K.</div></div>
+      </div>
+      <div class="kanban-col">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:11px;font-weight:600;color:#374151;">Lost</span><span class="badge badge-lost mono" style="font-size:10px;">3</span></div>
+        <div class="kanban-card"><div class="font-medium text-gray-900" style="margin-bottom:3px;">Lestari Indah</div><div class="text-gray-500" style="font-size:11px;">Campaign &middot; Score <span class="score-low font-medium">12</span></div><div class="text-gray-400" style="font-size:10px;margin-top:3px;">Rini P.</div></div>
+        <div class="kanban-card"><div class="font-medium text-gray-900" style="margin-bottom:3px;">Fitria Handayani</div><div class="text-gray-500" style="font-size:11px;">Manual &middot; Score <span class="score-low font-medium">8</span></div><div class="text-gray-400" style="font-size:10px;margin-top:3px;">Rini P.</div></div>
+      </div>
     </div>
+  </div>
 
-    <!-- Charts side by side -->
-    <div class="grid grid-cols-3 gap-2 mb-3">
-
-      <!-- Line chart -->
-      <div class="col-span-2 bg-white border border-gray-200 rounded p-3">
-        <div class="flex items-center justify-between mb-2">
-          <span class="font-medium text-gray-800" style="font-size:12px">Cost Trend — 6 Months</span>
-          <div class="flex gap-3" style="font-size:10px;color:#6b7280">
-            <span class="flex items-center gap-1"><span class="inline-block w-4" style="height:2px;background:#4f46e5;border-radius:2px"></span>Total</span>
-            <span class="flex items-center gap-1"><span class="inline-block w-4" style="height:2px;background:#f97316;border-radius:2px"></span>OpenAI</span>
-            <span class="flex items-center gap-1"><span class="inline-block w-4" style="height:2px;background:#14b8a6;border-radius:2px"></span>WA</span>
-            <span class="flex items-center gap-1"><span class="inline-block w-4" style="height:2px;background:#a78bfa;border-radius:2px"></span>Infra</span>
+  <!-- FUNNEL -->
+  <div id="leads-funnel" style="display:none;">
+    <div class="bg-white border border-gray-200 rounded-md shadow-sm p-6">
+      <h3 style="font-size:13px;font-weight:600;color:#111827;margin-bottom:16px;">Lead Conversion Funnel — Current Period</h3>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="mono text-gray-500" style="width:70px;text-align:right;font-size:11px;">18 leads</div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><span style="font-size:12px;font-weight:500;color:#374151;">New</span><span class="mono text-gray-400" style="font-size:11px;">100% baseline</span></div>
+            <div style="height:26px;background:#f3f4f6;border-radius:4px;overflow:hidden;"><div style="height:100%;width:100%;background:#9ca3af;border-radius:4px;"></div></div>
           </div>
         </div>
-        <svg viewBox="0 0 480 180" class="w-full" style="height:180px">
-          <!-- axes -->
-          <line x1="42" y1="12" x2="42" y2="155" stroke="#e5e7eb" stroke-width="1"/>
-          <line x1="42" y1="155" x2="475" y2="155" stroke="#e5e7eb" stroke-width="1"/>
-          <!-- horizontal guides -->
-          <line x1="42" y1="120" x2="475" y2="120" stroke="#f3f4f6" stroke-width="1" stroke-dasharray="3,3"/>
-          <line x1="42" y1="85" x2="475" y2="85" stroke="#f3f4f6" stroke-width="1" stroke-dasharray="3,3"/>
-          <line x1="42" y1="50" x2="475" y2="50" stroke="#f3f4f6" stroke-width="1" stroke-dasharray="3,3"/>
-          <!-- Y labels -->
-          <text x="37" y="158" text-anchor="end" font-size="8" fill="#9ca3af" font-family="IBM Plex Mono">0</text>
-          <text x="37" y="123" text-anchor="end" font-size="8" fill="#9ca3af" font-family="IBM Plex Mono">3M</text>
-          <text x="37" y="88" text-anchor="end" font-size="8" fill="#9ca3af" font-family="IBM Plex Mono">6M</text>
-          <text x="37" y="53" text-anchor="end" font-size="8" fill="#9ca3af" font-family="IBM Plex Mono">9M</text>
-          <!-- X labels -->
-          <text x="80" y="168" text-anchor="middle" font-size="8" fill="#9ca3af">Oct</text>
-          <text x="163" y="168" text-anchor="middle" font-size="8" fill="#9ca3af">Nov</text>
-          <text x="246" y="168" text-anchor="middle" font-size="8" fill="#9ca3af">Dec</text>
-          <text x="329" y="168" text-anchor="middle" font-size="8" fill="#9ca3af">Jan</text>
-          <text x="396" y="168" text-anchor="middle" font-size="8" fill="#9ca3af">Feb</text>
-          <text x="463" y="168" text-anchor="middle" font-size="8" fill="#9ca3af">Mar</text>
-          <!-- Total line indigo -->
-          <polyline points="80,102 163,95 246,108 329,88 396,78 463,72" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-          <circle cx="80" cy="102" r="3" fill="#4f46e5"/><circle cx="163" cy="95" r="3" fill="#4f46e5"/>
-          <circle cx="246" cy="108" r="3" fill="#4f46e5"/><circle cx="329" cy="88" r="3" fill="#4f46e5"/>
-          <circle cx="396" cy="78" r="3" fill="#4f46e5"/><circle cx="463" cy="72" r="3" fill="#4f46e5"/>
-          <!-- OpenAI orange -->
-          <polyline points="80,122 163,118 246,128 329,110 396,104 463,99" fill="none" stroke="#f97316" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-          <!-- WA teal -->
-          <polyline points="80,136 163,133 246,130 329,128 396,124 463,121" fill="none" stroke="#14b8a6" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-          <!-- Infra purple -->
-          <polyline points="80,148 163,146 246,145 329,144 396,143 463,142" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-        </svg>
-      </div>
-
-      <!-- Donut -->
-      <div class="bg-white border border-gray-200 rounded p-3">
-        <div class="font-medium text-gray-800 mb-2" style="font-size:12px">Cost Distribution</div>
-        <svg viewBox="0 0 180 150" class="w-full" style="height:150px">
-          <circle cx="90" cy="75" r="52" fill="none" stroke="#f3f4f6" stroke-width="28"/>
-          <circle cx="90" cy="75" r="52" fill="none" stroke="#4f46e5" stroke-width="28" stroke-dasharray="123.5 203.3" stroke-dashoffset="0" transform="rotate(-90 90 75)"/>
-          <circle cx="90" cy="75" r="52" fill="none" stroke="#f97316" stroke-width="28" stroke-dasharray="110.5 216.3" stroke-dashoffset="-123.5" transform="rotate(-90 90 75)"/>
-          <circle cx="90" cy="75" r="52" fill="none" stroke="#14b8a6" stroke-width="28" stroke-dasharray="55.2 271.6" stroke-dashoffset="-234" transform="rotate(-90 90 75)"/>
-          <circle cx="90" cy="75" r="52" fill="none" stroke="#e5e7eb" stroke-width="28" stroke-dasharray="37.7 289.1" stroke-dashoffset="-289.2" transform="rotate(-90 90 75)"/>
-          <text x="90" y="71" text-anchor="middle" font-size="13" font-weight="600" fill="#111827" font-family="IBM Plex Mono">8.24M</text>
-          <text x="90" y="83" text-anchor="middle" font-size="8" fill="#6b7280">Rp/month</text>
-        </svg>
-        <div class="space-y-1 mt-1">
-          <div class="flex items-center justify-between" style="font-size:11px"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-500 flex-shrink-0"></span>OpenAI</span><span class="mono text-gray-700 font-medium">38% · 3.1M</span></div>
-          <div class="flex items-center justify-between" style="font-size:11px"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0"></span>360dialog</span><span class="mono text-gray-700 font-medium">34% · 2.8M</span></div>
-          <div class="flex items-center justify-between" style="font-size:11px"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-teal-400 flex-shrink-0"></span>Infra</span><span class="mono text-gray-700 font-medium">17% · 1.4M</span></div>
-          <div class="flex items-center justify-between" style="font-size:11px"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0"></span>Other</span><span class="mono text-gray-700 font-medium">11% · 0.9M</span></div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="mono text-gray-500" style="width:70px;text-align:right;font-size:11px;">22 leads</div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><span style="font-size:12px;font-weight:500;color:#374151;">Qualified</span><span class="mono text-gray-400" style="font-size:11px;">26% of total &nbsp;&middot;&nbsp; 52% from New</span></div>
+            <div style="height:26px;background:#f3f4f6;border-radius:4px;overflow:hidden;"><div style="height:100%;width:82%;background:#3b82f6;border-radius:4px;"></div></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="mono text-gray-500" style="width:70px;text-align:right;font-size:11px;">16 leads</div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><span style="font-size:12px;font-weight:500;color:#374151;">Contacted</span><span class="mono text-gray-400" style="font-size:11px;">19% of total &nbsp;&middot;&nbsp; 73% from Qualified</span></div>
+            <div style="height:26px;background:#f3f4f6;border-radius:4px;overflow:hidden;"><div style="height:100%;width:62%;background:#6366f1;border-radius:4px;"></div></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="mono text-gray-500" style="width:70px;text-align:right;font-size:11px;">11 leads</div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><span style="font-size:12px;font-weight:500;color:#374151;">Negotiation</span><span class="mono text-gray-400" style="font-size:11px;">13% of total &nbsp;&middot;&nbsp; 69% from Contacted</span></div>
+            <div style="height:26px;background:#f3f4f6;border-radius:4px;overflow:hidden;"><div style="height:100%;width:44%;background:#f59e0b;border-radius:4px;"></div></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="mono text-gray-500" style="width:70px;text-align:right;font-size:11px;">14 leads</div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><span style="font-size:12px;font-weight:500;color:#374151;">Converted</span><span class="mono text-gray-400" style="font-size:11px;">17% of total &nbsp;&middot;&nbsp; cvr from Negotiation</span></div>
+            <div style="height:26px;background:#f3f4f6;border-radius:4px;overflow:hidden;"><div style="height:100%;width:56%;background:#22c55e;border-radius:4px;"></div></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="mono text-gray-500" style="width:70px;text-align:right;font-size:11px;">3 leads</div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><span style="font-size:12px;font-weight:500;color:#374151;">Lost</span><span class="mono text-gray-400" style="font-size:11px;">4% churn rate</span></div>
+            <div style="height:26px;background:#f3f4f6;border-radius:4px;overflow:hidden;"><div style="height:100%;width:12%;background:#ef4444;border-radius:4px;"></div></div>
+          </div>
         </div>
       </div>
-    </div>
-
-    <!-- Per-org cost table (12 rows) -->
-    <div class="bg-white border border-gray-200 rounded overflow-hidden">
-      <div class="px-3 py-2 border-b border-gray-100">
-        <span class="font-medium text-gray-800" style="font-size:12px">Per-Organization Cost Breakdown — March 2026</span>
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid #f3f4f6;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:center;">
+        <div><div class="mono font-bold text-gray-900" style="font-size:20px;">84</div><div class="text-gray-500" style="font-size:11px;">Total Leads</div></div>
+        <div><div class="mono font-bold" style="font-size:20px;color:#16a34a;">16.7%</div><div class="text-gray-500" style="font-size:11px;">Overall Conversion Rate</div></div>
+        <div><div class="mono font-bold text-gray-900" style="font-size:20px;">8.4d</div><div class="text-gray-500" style="font-size:11px;">Avg Time to Convert</div></div>
       </div>
-      <table class="w-full">
-        <thead>
-          <tr class="bg-gray-50 border-b border-gray-200">
-            <th class="px-2 py-1.5 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Organization</th>
-            <th class="px-2 py-1.5 text-right font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Leads</th>
-            <th class="px-2 py-1.5 text-right font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">WA Msgs</th>
-            <th class="px-2 py-1.5 text-right font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">AI Tokens</th>
-            <th class="px-2 py-1.5 text-right font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">AI Cost</th>
-            <th class="px-2 py-1.5 text-right font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">WA Cost</th>
-            <th class="px-2 py-1.5 text-right font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Infra</th>
-            <th class="px-2 py-1.5 text-right font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Total</th>
-            <th class="px-2 py-1.5 text-right font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">Cost/Lead</th>
-            <th class="px-2 py-1.5 text-left font-medium text-gray-500" style="font-size:10px;text-transform:uppercase">MoM</th>
-          </tr>
-        </thead>
-        <tbody id="dense-cost-tbody"></tbody>
-      </table>
     </div>
-
   </div>
+</div>
+
 </main>
 
 <script>
-// ===== Data =====
-const activityLog = [
-  ["09:41","Budi Santoso","Stage → Qualified","PT Maju Bersama","Rina A."],
-  ["09:26","Dewi Rahayu","Lead created (WA)","CV Sejahtera","System"],
-  ["08:53","Rudi Hermawan","AI score: 88","PT Solusi Digital","AI Bot"],
-  ["08:31","Siti Nurhaliza","Proposal sent","UD Karya Mandiri","Bowo C."],
-  ["07:14","Agus Prasetyo","Deal won","PT Nusantara Tech","Ahmad B."],
-  ["06:58","Fitri Handayani","Contacted via WA","CV Tumbuh Jaya","Rina A."],
-  ["Yesterday","Yanti Susanti","Stage → Won","PT Cahaya Abadi","Ahmad B."],
-  ["Yesterday","Hendra Kurniawan","Score updated: 52","UD Berkah Usaha","AI Bot"],
-];
-
-const actTbody = document.getElementById('activity-tbody');
-activityLog.forEach(([time, lead, event, org, actor], i) => {
-  const bg = i % 2 === 1 ? 'background:#f8f9fa' : '';
-  actTbody.innerHTML += `<tr style="${bg}">
-    <td class="px-3 py-1.5 mono text-gray-400" style="font-size:11px">${time}</td>
-    <td class="px-3 py-1.5 font-medium text-gray-800" style="font-size:12px">${lead}</td>
-    <td class="px-3 py-1.5 text-gray-600" style="font-size:12px">${event}</td>
-    <td class="px-3 py-1.5 text-gray-500" style="font-size:12px">${org}</td>
-    <td class="px-3 py-1.5 text-gray-400" style="font-size:11px">${actor}</td>
-  </tr>`;
-});
-
-const topOrgs = [
-  ["PT Maju Bersama",612,82,20.5,"Rp 900K","Rp 1,471","Pro"],
-  ["PT Nusantara Tech",521,91,17.5,"Rp 770K","Rp 1,478","Enterprise"],
-  ["PT Cahaya Abadi",445,78,19.1,"Rp 660K","Rp 1,483","Pro"],
-  ["CV Sejahtera",401,63,15.7,"Rp 590K","Rp 1,471","Standard"],
-  ["PT Solusi Digital",387,71,18.3,"Rp 550K","Rp 1,421","Pro"],
-];
-const topTbody = document.getElementById('top-orgs-tbody');
-topOrgs.forEach(([org,leads,won,conv,cost,cpl,plan], i) => {
-  const bg = i % 2 === 1 ? 'background:#f8f9fa' : '';
-  const planColor = plan === 'Enterprise' ? 'color:#7c3aed;background:#ede9fe' : plan === 'Pro' ? 'color:#1d4ed8;background:#dbeafe' : 'color:#374151;background:#f3f4f6';
-  topTbody.innerHTML += `<tr style="${bg}">
-    <td class="px-3 py-1.5 mono text-gray-400" style="font-size:11px">${i+1}</td>
-    <td class="px-3 py-1.5 font-medium text-gray-800" style="font-size:12px">${org}</td>
-    <td class="px-3 py-1.5 text-right mono text-gray-700" style="font-size:12px">${leads}</td>
-    <td class="px-3 py-1.5 text-right mono text-gray-700" style="font-size:12px">${won}</td>
-    <td class="px-3 py-1.5 text-right mono text-gray-700" style="font-size:12px">${conv}%</td>
-    <td class="px-3 py-1.5 text-right mono font-medium text-gray-900" style="font-size:12px">${cost}</td>
-    <td class="px-3 py-1.5 text-right mono text-gray-600" style="font-size:12px">${cpl}</td>
-    <td class="px-3 py-1.5"><span class="rounded px-1.5 py-0.5 font-medium" style="font-size:10px;${planColor}">${plan}</span></td>
-  </tr>`;
-});
-
-// Dense leads data (25 rows)
-const denseLeads = [
-  ["Budi Santoso","+62-811-234-001","PT Maju Bersama","WA","Qualified",82,"Rina A.","2h ago"],
-  ["Dewi Rahayu","+62-822-345-002","CV Sejahtera","Web","New",38,"Ahmad B.","15m ago"],
-  ["Rudi Hermawan","+62-833-456-003","PT Solusi Digital","Ref","Hot",88,"Rina A.","1h ago"],
-  ["Siti Nurhaliza","+62-844-567-004","UD Karya Mandiri","Web","Negotiation",91,"Bowo C.","3h ago"],
-  ["Agus Prasetyo","+62-855-678-005","PT Nusantara Tech","Ref","Won",95,"Ahmad B.","Yesterday"],
-  ["Lestari Putri","+62-866-789-006","CV Tumbuh Jaya","WA","Contacted",61,"Rina A.","4h ago"],
-  ["Wahyu Hidayat","+62-877-890-007","PT Cahaya Abadi","Web","Contacted",59,"Bowo C.","5h ago"],
-  ["Ika Pratiwi","+62-888-901-008","UD Berkah Usaha","WA","Qualified",77,"Ahmad B.","6h ago"],
-  ["Bambang Suharto","+62-899-012-009","PT Maju Bersama","Ref","New",45,"Rina A.","7h ago"],
-  ["Retno Wulandari","+62-811-023-010","CV Sejahtera","Web","New",38,"Bowo C.","8h ago"],
-  ["Hendra Kurniawan","+62-822-134-011","PT Solusi Digital","WA","New",52,"Ahmad B.","9h ago"],
-  ["Yanti Susanti","+62-833-245-012","PT Nusantara Tech","Ref","Won",91,"Rina A.","Yesterday"],
-  ["Dodi Firmansyah","+62-844-356-013","UD Karya Mandiri","Web","Lost",22,"Bowo C.","2d ago"],
-  ["Fitri Handayani","+62-855-467-014","CV Tumbuh Jaya","WA","Qualified",74,"Ahmad B.","10h ago"],
-  ["Joko Santoso","+62-866-578-015","PT Cahaya Abadi","Ref","Contacted",66,"Rina A.","11h ago"],
-  ["Maya Kusuma","+62-877-689-016","PT Maju Bersama","WA","New",41,"Bowo C.","12h ago"],
-  ["Rizky Aditya","+62-888-790-017","CV Sejahtera","Web","Negotiation",85,"Ahmad B.","13h ago"],
-  ["Nurul Hidayah","+62-899-891-018","PT Solusi Digital","Ref","Qualified",79,"Rina A.","14h ago"],
-  ["Eko Purnomo","+62-811-902-019","UD Berkah Usaha","WA","Contacted",55,"Bowo C.","15h ago"],
-  ["Sri Wahyuni","+62-822-013-020","PT Nusantara Tech","Web","New",33,"Ahmad B.","16h ago"],
-  ["Tono Susilo","+62-833-124-021","CV Tumbuh Jaya","Ref","Contacted",62,"Rina A.","Yesterday"],
-  ["Widi Astuti","+62-844-235-022","PT Cahaya Abadi","WA","Qualified",71,"Bowo C.","Yesterday"],
-  ["Andi Wijaya","+62-855-346-023","PT Maju Bersama","Web","Won",90,"Ahmad B.","2d ago"],
-  ["Rini Susanti","+62-866-457-024","CV Sejahtera","Ref","Lost",18,"Rina A.","2d ago"],
-  ["Fajar Nugroho","+62-877-568-025","PT Solusi Digital","WA","New",48,"Bowo C.","2d ago"],
-];
-
-const stageBadge = {
-  "New":"background:#dbeafe;color:#1e40af","Contacted":"background:#f3f4f6;color:#374151",
-  "Hot":"background:#ffedd5;color:#c2410c","Qualified":"background:#dcfce7;color:#15803d",
-  "Negotiation":"background:#ede9fe;color:#6d28d9","Won":"background:#dcfce7;color:#166534","Lost":"background:#fee2e2;color:#b91c1c"
-};
-const srcBadge = {
-  "WA":"background:#ccfbf1;color:#0f766e","Web":"background:#e0e7ff;color:#3730a3","Ref":"background:#fef9c3;color:#854d0e"
-};
-
-const dTbody = document.getElementById('dense-leads-tbody');
-denseLeads.forEach(([name,phone,org,src,stage,score,assigned,last], i) => {
-  const bg = i % 2 === 1 ? 'background:#f8f9fa' : '';
-  dTbody.innerHTML += `<tr style="${bg}" class="border-b border-gray-100 hover:bg-yellow-50">
-    <td class="px-2 py-2 w-6"><input type="checkbox" class="rounded border-gray-300"/></td>
-    <td class="px-2 py-2 font-medium text-gray-900" style="font-size:12px">${name}</td>
-    <td class="px-2 py-2 mono text-gray-500" style="font-size:11px">${phone}</td>
-    <td class="px-2 py-2 text-gray-600" style="font-size:11px">${org}</td>
-    <td class="px-2 py-2"><span class="rounded px-1.5 py-0.5 font-medium" style="font-size:10px;${srcBadge[src]}">${src}</span></td>
-    <td class="px-2 py-2"><span class="rounded px-1.5 py-0.5 font-medium" style="font-size:10px;${stageBadge[stage]}">${stage}</span></td>
-    <td class="px-2 py-2 text-right mono font-semibold text-gray-800" style="font-size:12px">${score}</td>
-    <td class="px-2 py-2 text-gray-500" style="font-size:11px">${assigned}</td>
-    <td class="px-2 py-2 text-gray-400 mono" style="font-size:10px">${last}</td>
-    <td class="px-2 py-2">
-      <div class="flex items-center gap-1">
-        <button title="View" class="text-gray-400 hover:text-indigo-600 p-0.5 rounded hover:bg-indigo-50">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z"/></svg>
-        </button>
-        <button title="Edit" class="text-gray-400 hover:text-indigo-600 p-0.5 rounded hover:bg-indigo-50">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-        </button>
-        <button title="Delete" class="text-gray-400 hover:text-red-500 p-0.5 rounded hover:bg-red-50">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-        </button>
-      </div>
-    </td>
-  </tr>`;
-});
-
-// Kanban data
-const kanbanData = {
-  "new": [["Bambang Suharto","+62-899-012-009","Ref",45],["Retno Wulandari","+62-811-023-010","Web",38],["Hendra Kurniawan","+62-822-134-011","WA",52],["Maya Kusuma","+62-877-689-016","WA",41]],
-  "contacted": [["Lestari Putri","+62-866-789-006","WA",61],["Wahyu Hidayat","+62-877-890-007","Web",59],["Joko Santoso","+62-866-578-015","Ref",66],["Eko Purnomo","+62-811-902-019","WA",55]],
-  "qualified": [["Budi Santoso","+62-811-234-001","WA",82],["Ika Pratiwi","+62-888-901-008","WA",77],["Fitri Handayani","+62-855-467-014","WA",74],["Nurul Hidayah","+62-899-891-018","Ref",79]],
-  "negotiation": [["Siti Nurhaliza","+62-844-567-004","Web",91],["Rizky Aditya","+62-888-790-017","Web",85]],
-  "won": [["Agus Prasetyo","+62-855-678-005","Ref",95],["Yanti Susanti","+62-833-245-012","Ref",91],["Andi Wijaya","+62-855-346-023","Web",90]],
-  "lost": [["Dodi Firmansyah","+62-844-356-013","Web",22],["Rini Susanti","+62-866-457-024","Ref",18]]
-};
-
-Object.entries(kanbanData).forEach(([col, items]) => {
-  const container = document.getElementById('kanban-' + col);
-  if (!container) return;
-  items.forEach(([name, phone, src, score]) => {
-    container.innerHTML += `<div class="bg-gray-50 border border-gray-100 rounded p-2">
-      <div class="font-medium text-gray-800" style="font-size:11px">${name}</div>
-      <div class="flex items-center justify-between mt-0.5">
-        <span class="mono text-gray-400" style="font-size:10px">${phone.slice(0,10)}…</span>
-        <span class="mono font-semibold text-gray-600" style="font-size:10px">${score}</span>
-      </div>
-      <span class="inline-block rounded px-1 py-0.5 font-medium mt-0.5" style="font-size:9px;${srcBadge[src]}">${src}</span>
-    </div>`;
-  });
-});
-
-// Dense cost data (12 rows)
-const denseCost = [
-  ["PT Maju Bersama",612,1842,"1.24M","480K","420K","45K","945K","1,544","+3.1%",true],
-  ["PT Nusantara Tech",521,1563,"1.05M","410K","360K","38K","808K","1,551","+4.1%",true],
-  ["PT Cahaya Abadi",445,1335,"897K","350K","310K","32K","692K","1,556","+1.7%",true],
-  ["CV Sejahtera",401,1203,"808K","310K","280K","29K","619K","1,544","-1.2%",false],
-  ["PT Solusi Digital",387,1161,"780K","290K","260K","28K","578K","1,493","+2.8%",true],
-  ["UD Karya Mandiri",298,894,"601K","220K","200K","21K","441K","1,480","-0.5%",false],
-  ["CV Tumbuh Jaya",189,567,"381K","140K","130K","14K","284K","1,503","-2.3%",false],
-  ["UD Berkah Usaha",211,633,"425K","160K","145K","15K","320K","1,517","+0.9%",true],
-  ["PT Harmoni Jaya",178,534,"359K","130K","120K","13K","263K","1,478","-1.8%",false],
-  ["CV Mitra Sukses",156,468,"314K","118K","108K","11K","237K","1,519","+2.2%",true],
-  ["PT Cipta Karya",134,402,"270K","100K","92K","10K","202K","1,507","-0.3%",false],
-  ["UD Sumber Makmur",89,267,"179K","68K","62K","7K","137K","1,539","+1.1%",true],
-];
-
-const dcTbody = document.getElementById('dense-cost-tbody');
-denseCost.forEach(([org,leads,msgs,tokens,ai,wa,infra,total,cpl,mom,up], i) => {
-  const bg = i % 2 === 1 ? 'background:#f8f9fa' : '';
-  dcTbody.innerHTML += `<tr style="${bg}" class="border-b border-gray-100 hover:bg-gray-50">
-    <td class="px-2 py-2 font-medium text-gray-800" style="font-size:12px">${org}</td>
-    <td class="px-2 py-2 text-right mono text-gray-700" style="font-size:12px">${leads}</td>
-    <td class="px-2 py-2 text-right mono text-gray-700" style="font-size:12px">${msgs}</td>
-    <td class="px-2 py-2 text-right mono text-gray-500" style="font-size:11px">${tokens}</td>
-    <td class="px-2 py-2 text-right mono text-gray-700" style="font-size:12px">Rp ${ai}</td>
-    <td class="px-2 py-2 text-right mono text-gray-700" style="font-size:12px">Rp ${wa}</td>
-    <td class="px-2 py-2 text-right mono text-gray-600" style="font-size:11px">Rp ${infra}</td>
-    <td class="px-2 py-2 text-right mono font-semibold text-gray-900" style="font-size:12px">Rp ${total}</td>
-    <td class="px-2 py-2 text-right mono text-gray-700" style="font-size:12px">Rp ${cpl}</td>
-    <td class="px-2 py-2 mono font-medium ${up?'text-green-600':'text-red-500'}" style="font-size:11px">${up?'▲':'▼'} ${mom}</td>
-  </tr>`;
-});
-
-// ===== Navigation =====
-function showTab(name) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-link').forEach(btn => {
-    btn.classList.remove('border-indigo-600','text-indigo-700','font-medium');
-    btn.classList.add('border-transparent','text-gray-600');
-  });
-  document.getElementById('tab-content-' + name).classList.add('active');
-  const navBtn = document.getElementById('nav-' + name);
-  navBtn.classList.add('border-indigo-600','text-indigo-700','font-medium');
-  navBtn.classList.remove('border-transparent','text-gray-600');
-  document.getElementById('breadcrumb-cur').textContent = name.charAt(0).toUpperCase() + name.slice(1);
+function switchTab(e, tab) {
+  document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(el) { el.classList.remove('active'); });
+  document.getElementById('tab-' + tab).classList.add('active');
+  e.target.classList.add('active');
 }
 
-function showSubTab(parent, sub) {
-  document.querySelectorAll('[id^="sub-' + parent + '-"][id$="-content"]').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('[id^="sub-' + parent + '-"]:not([id$="-content"])').forEach(btn => {
-    btn.classList.remove('border-indigo-300','bg-indigo-50','text-indigo-700');
-    btn.classList.add('border-gray-200','bg-white','text-gray-600');
+function switchSubTab(id, el) {
+  ['leads-table','leads-pipeline','leads-funnel'].forEach(function(s) {
+    var el2 = document.getElementById(s);
+    if (el2) el2.style.display = 'none';
   });
-  document.getElementById('sub-' + parent + '-' + sub + '-content').classList.add('active');
-  const btn = document.getElementById('sub-' + parent + '-' + sub);
-  btn.classList.add('border-indigo-300','bg-indigo-50','text-indigo-700');
-  btn.classList.remove('border-gray-200','bg-white','text-gray-600');
+  document.querySelectorAll('.sub-tab').forEach(function(s) { s.classList.remove('active'); });
+  var target = document.getElementById(id);
+  if (target) target.style.display = 'block';
+  el.classList.add('active');
+}
+
+function setPeriod(el) {
+  document.querySelectorAll('.period-btn').forEach(function(b) { b.classList.remove('active'); });
+  el.classList.add('active');
 }
 </script>
 </body>
